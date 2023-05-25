@@ -1,22 +1,20 @@
-package com.kurt.gym.auth.model.services;
+package com.kurt.gym.auth.model.services.user;
 
-import java.util.Date;
 import java.util.HashMap;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.kurt.gym.auth.api.UserGet;
-import com.kurt.gym.auth.model.User;
+import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Transactional
 @Service
 public class UserServiceImplementation implements UserService{
 
@@ -37,9 +35,11 @@ public class UserServiceImplementation implements UserService{
     }
 
     @Override
-    public ResponseEntity<Page<UserGet>> data(String search, long size, int page) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'data'");
+    public ResponseEntity<Page<User>> data(String search, int size, int page) {
+        Pageable pageable = PageRequest.of(page,size);
+        Page<User> users = userRepository.findAll(pageable);
+        
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class UserServiceImplementation implements UserService{
     }
 
     @Override
-    public ResponseEntity<UserGet> findOne(Long id) {
-        UserGet userGet = userRepository.getUser(id);
+    public ResponseEntity<User> findOne(Long id) {
+        User userGet = userRepository.getUser(id);
         return new ResponseEntity<>(userGet,HttpStatus.OK);
     }
 

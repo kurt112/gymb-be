@@ -1,51 +1,50 @@
-package com.kurt.gym.customer.model;
+package com.kurt.gym.gym.model.store;
 
 import java.util.Date;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import com.kurt.gym.auth.model.user.User;
-
-import jakarta.persistence.CascadeType;
+import com.kurt.gym.schedule.model.Schedule;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
 @Table
 @Entity
+@Builder
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class Customer {
+public class Store {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn
-    private User user;
+    private String name;
 
-    private Date membershipDuration;
+    @JoinColumn(name = "parent_store")
+    @OneToOne
+    private Store parent;
 
-    private short membershipLevel;
+    @OneToMany
+    private Set<Schedule> schedules;
 
     @CreationTimestamp
     private Date createdAt;
-    
+
     @UpdateTimestamp
     private Date updatedAt;
-    
 }

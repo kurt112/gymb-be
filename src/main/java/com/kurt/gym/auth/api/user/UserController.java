@@ -1,6 +1,5 @@
-package com.kurt.gym.auth.api;
+package com.kurt.gym.auth.api.user;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,10 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kurt.gym.auth.model.User;
-import com.kurt.gym.auth.model.services.UserService;
+import com.kurt.gym.auth.model.services.user.UserService;
+import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,16 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping
+    public ResponseEntity<?> getUsers(
+        @RequestParam("page") int page, 
+        @RequestParam("size") int size, 
+        @RequestParam("search") String search) {
+        
+
+            return userService.data(search, size, page -1);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable Long id){
