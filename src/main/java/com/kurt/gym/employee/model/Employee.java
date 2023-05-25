@@ -1,14 +1,18 @@
-package com.kurt.gym.auth.model.user;
-
+package com.kurt.gym.employee.model;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.kurt.gym.auth.model.user.User;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,35 +27,27 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class User {
-
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName;
-    private String lastName;
-    private String middleName;
-    private String email;
-    private String password;
-    private String cellphone;
-    private String sex;
-    private String suffix;
-    private Date birthDate;
-    private String rfID;
-    private String bmi;
-    private Float bmiNumber;
-    private Double weight;
-    private Double height;
-    private Boolean isMember;
-    private Date membershipDateStart;
-    private Date membershipDateEnd;
-    private Date lastIn;
-
+    @OneToOne(cascade=CascadeType.ALL)
+    @JoinColumn
+    private User user;
 
     @CreationTimestamp
     private Date createdAt;
     
     @UpdateTimestamp
     private Date updatedAt;
+
+    public static Employee buildEmployeeFromReference(Employee employee){
+        return Employee.builder()
+        .id(employee.getId())
+        .user(employee.getUser())
+        .createdAt(employee.getCreatedAt())
+        .updatedAt(employee.getUpdatedAt())
+        .build();
+    }
 }

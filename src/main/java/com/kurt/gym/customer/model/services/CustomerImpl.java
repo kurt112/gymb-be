@@ -26,16 +26,17 @@ public class CustomerImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     @Override
-   @CachePut(cacheNames = {"customer"}, key = "#t.id")
+    @CachePut(cacheNames = { "customer" }, key = "#t.id")
     public ResponseEntity<HashMap<String, String>> save(Customer t) {
         customerRepository.saveAndFlush(t);
         return ApiMessage.successResponse("Customer saved successfully");
     }
 
     @Override
-    @CacheEvict(cacheNames = {"customer"}, key = "#t.id")
+    @CacheEvict(cacheNames = { "customer" }, key = "#t.id")
     public ResponseEntity<HashMap<String, String>> delete(Customer t) {
-        if(isExist(t.getId()) == null) return ApiMessage.errorResponse("No customer found");
+        if (isExist(t.getId()) == null)
+            return ApiMessage.errorResponse("No customer found");
 
         customerRepository.deleteById(t.getId());
 
@@ -43,10 +44,11 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
-    @CacheEvict(cacheNames = {"customer"}, key = "#id")
+    @CacheEvict(cacheNames = { "customer" }, key = "#id")
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
-        if(isExist(id) == null) return ApiMessage.errorResponse("No customer found");
+        if (isExist(id) == null)
+            return ApiMessage.errorResponse("No customer found");
 
         customerRepository.deleteById(id);
 
@@ -60,25 +62,20 @@ public class CustomerImpl implements CustomerService {
 
     @Override
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<Customer> customers = customerRepository.findAll(pageable);
-        
+
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
     @Override
     @Cacheable(cacheNames = "customer", key = "#id")
-    public ResponseEntity<Customer> findOne(Long id) {      
-        System.out.println("i am hereee");
+    public ResponseEntity<Customer> findOne(Long id) {
         Customer fromDb = customerRepository.getReferenceById(id);
-        Customer customer = Customer.builder()
-        .id(fromDb.getId())
-        .user(fromDb.getUser())
-        .createdAt(fromDb.getCreatedAt())
-        .updatedAt(fromDb.getUpdatedAt())
-        .build();
-        return new ResponseEntity<Customer>(customer, HttpStatus.OK);
+
+        return new ResponseEntity<Customer>(
+                Customer.buildFromReference(fromDb),
+                HttpStatus.OK);
     }
 
-    
 }

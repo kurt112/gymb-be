@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Builder
 @Table
@@ -28,6 +29,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Customer {
 
     @Id
@@ -47,5 +49,17 @@ public class Customer {
     
     @UpdateTimestamp
     private Date updatedAt;
+
+    public static Customer buildFromReference(Customer customer) {
+        return Customer
+        .builder()
+        .id(customer.getId())
+        .membershipDuration(customer.getMembershipDuration())
+        .createdAt(customer.getCreatedAt())
+        .updatedAt(customer.getUpdatedAt())
+        .membershipLevel(customer.getMembershipLevel())
+        .user(customer.getUser())
+        .build();
+    }
     
 }
