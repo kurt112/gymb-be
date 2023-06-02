@@ -8,6 +8,10 @@ import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.kurt.gym.helper.SqlTimeDeserializer;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,11 +36,13 @@ public class Schedule {
 
     private short day;
 
+    @JsonFormat(pattern = "hh:mm:ss")
+    @JsonDeserialize(using = SqlTimeDeserializer.class)
     private Time startTime;
-    private Time endTime;
 
-    private Date startDate;
-    private Date endDate;
+    @JsonFormat(pattern = "hh:mm:ss")
+    @JsonDeserialize(using = SqlTimeDeserializer.class)
+    private Time endTime;
 
     @CreationTimestamp
     private Date createdAt;

@@ -47,7 +47,7 @@ public class User {
     private Date membershipDateStart;
     private Date membershipDateEnd;
     private Date lastIn;
-
+        
 
     @CreationTimestamp
     private Date createdAt;
