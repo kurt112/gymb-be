@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class MembershipWithUserServiceImpl implements MembershipWithUserService{
+public class MembershipWithUserServiceImpl implements MembershipWithUserService {
 
     private final MembershipWithUserRepository membershipWithUserRepository;
 
@@ -40,10 +40,9 @@ public class MembershipWithUserServiceImpl implements MembershipWithUserService{
     public ResponseEntity<?> findOne(Long id) {
         MembershipWithUser membershipWithUser = membershipWithUserRepository.findById(id).orElse(null);
 
-        if(membershipWithUser == null) return ApiMessage.errorResponse("Membership with user not found")
+        if(membershipWithUser == null) return ApiMessage.errorResponse("Membership with user not found");
    
         return new ResponseEntity<>(membershipWithUser, HttpStatus.OK);
     }
 
-    
 }
