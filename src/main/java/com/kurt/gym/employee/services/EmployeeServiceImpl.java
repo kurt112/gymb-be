@@ -25,17 +25,20 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @CachePut(cacheNames = { "employee" }, key = "#t.id")
-    public ResponseEntity<HashMap<String, String>> save(Employee t) {
+    public ResponseEntity<Employee> save(Employee t) {
         employeeRepository.save(t);
 
-        return ApiMessage.successResponse("Employees saved successfully");
+        return new ResponseEntity<Employee>(
+                t,
+                HttpStatus.OK);
     }
 
     @Override
     @CacheEvict(cacheNames = { "employee" }, key = "#t.id")
     public ResponseEntity<HashMap<String, String>> delete(Employee t) {
-        if (isExist(t.getId()) == null)
-            return ApiMessage.errorResponse("Employees deleted successfully");
+        Employee dbEmp = employeeRepository.findById(t.getId()).orElse(null);
+        if (dbEmp != null)
+            return ApiMessage.errorResponse("Employees not found");
         employeeRepository.delete(t);
         return ApiMessage.successResponse("Employees deleted successfully");
     }
@@ -43,29 +46,29 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @CacheEvict(cacheNames = { "employee" }, key = "#id")
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
-        if (isExist(id) == null)
-            return ApiMessage.errorResponse("Employee deleted successfully");
+        Employee dbEmp = employeeRepository.findById(id).orElse(null);
+        if (dbEmp != null)
+        return ApiMessage.errorResponse("Employees not found");
+
         employeeRepository.deleteById(id);
         return ApiMessage.successResponse("Employee deleted successfully");
     }
 
     @Override
-    public Long isExist(Long id) {
-        return employeeRepository.isExist(id);
-    }
-
-    @Override
     public ResponseEntity<Page<Employee>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.findAll(pageable);
-
+        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(pageable);
+      
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
     @Override
     @Cacheable(cacheNames = "employee", key = "#id")
-    public ResponseEntity<Employee> findOne(Long id) {
-        Employee employeeFromDb = employeeRepository.getReferenceById(id);
+    public ResponseEntity<?> findOne(Long id) {
+        Employee employeeFromDb = employeeRepository.findById(id).orElse(null);
+        
+        if(employeeFromDb == null)  return ApiMessage.errorResponse("Employee not found");
+
         return new ResponseEntity<Employee>(
                 Employee.buildEmployeeFromReference(employeeFromDb),
                 HttpStatus.OK);

@@ -1,5 +1,6 @@
 package com.kurt.gym.gym.model.classes.controller;
 
+import org.hibernate.sql.results.LoadingLogger_.logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class GymClassController {
 
     @PostMapping
     public ResponseEntity<?> addGymClass(@RequestBody GymClass gymClass) {
+        System.out.println(gymClass.getSchedules().size());
         return gymClassService.save(gymClass);
     }
 

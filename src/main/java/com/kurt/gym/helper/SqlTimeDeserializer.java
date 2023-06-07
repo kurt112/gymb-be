@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 public class SqlTimeDeserializer extends JsonDeserializer<Time> {
     @Override
     public Time deserialize(JsonParser jp, DeserializationContext ctxt) {
+
         try {
             return Time.valueOf(jp.getValueAsString() + ":00");
         } catch (IOException e) {

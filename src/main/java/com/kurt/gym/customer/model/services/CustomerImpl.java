@@ -27,15 +27,21 @@ public class CustomerImpl implements CustomerService {
 
     @Override
     @CachePut(cacheNames = { "customer" }, key = "#t.id")
-    public ResponseEntity<HashMap<String, String>> save(Customer t) {
+    public ResponseEntity<Customer> save(Customer t) {
         customerRepository.saveAndFlush(t);
-        return ApiMessage.successResponse("Customer saved successfully");
+
+        return new ResponseEntity<Customer>(
+                t,
+                HttpStatus.OK);
     }
 
     @Override
     @CacheEvict(cacheNames = { "customer" }, key = "#t.id")
     public ResponseEntity<HashMap<String, String>> delete(Customer t) {
-        if (isExist(t.getId()) == null)
+
+        Customer fromDb = customerRepository.findById(t.getId()).orElse(null);
+
+        if (fromDb == null)
             return ApiMessage.errorResponse("No customer found");
 
         customerRepository.deleteById(t.getId());
@@ -47,7 +53,9 @@ public class CustomerImpl implements CustomerService {
     @CacheEvict(cacheNames = { "customer" }, key = "#id")
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
-        if (isExist(id) == null)
+        Customer fromDb = customerRepository.findById(id).orElse(null);
+
+        if (fromDb == null)
             return ApiMessage.errorResponse("No customer found");
 
         customerRepository.deleteById(id);
@@ -56,25 +64,22 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
-    public Long isExist(Long id) {
-        return customerRepository.isCUstomerExist(id);
-    }
-
-    @Override
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Customer> customers = customerRepository.findAll(pageable);
+        Page<Customer> customers = customerRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
-    @Override
     @Cacheable(cacheNames = "customer", key = "#id")
-    public ResponseEntity<Customer> findOne(Long id) {
-        Customer fromDb = customerRepository.getReferenceById(id);
+    public ResponseEntity<?> findOne(Long id) {
+        Customer fromDb = customerRepository.findById(id).orElse(null);
+
+        if (fromDb == null)
+            return ApiMessage.errorResponse("Customer not found");
 
         return new ResponseEntity<Customer>(
-                Customer.buildFromReference(fromDb),
+                fromDb,
                 HttpStatus.OK);
     }
 

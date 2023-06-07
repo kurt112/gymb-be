@@ -25,49 +25,51 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
-    public ResponseEntity<HashMap<String, String>> save(GymClass t) {
-        System.out.println(t.getName());
-        System.out.println(t.getDateStart());
-        System.out.println(t.getName());
-        System.out.println(t.getSchedules());
-        
+    public ResponseEntity<GymClass> save(GymClass t) {
         gymClassRepository.save(t);
-        return ApiMessage.successResponse("Gym Class saved successfully");
+        return new ResponseEntity<GymClass>(
+                t,
+                HttpStatus.OK);
     }
 
     @Override
     @CacheEvict(cacheNames = { "gymClass" }, key = "#t.id")
-    public ResponseEntity<HashMap<String, String>> delete(GymClass t) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    public ResponseEntity<?> delete(GymClass t) {
+        GymClass gymClass = gymClassRepository.findById(t.getId()).orElse(null);
+
+        if(gymClass == null) return ApiMessage.errorResponse("GymClass not found");
+
+        return ApiMessage.successResponse("GymClass deleted")l
     }
 
     @Override
     @CacheEvict(cacheNames = { "gymClass" }, key = "#id")
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
+        GymClass gymClass = gymClassRepository.findById(id).orElse(null);
+
+        if(gymClass == null) return ApiMessage.errorResponse("GymClass not found");
+
+        return ApiMessage.successResponse("GymClass deleted")l
     }
 
-    @Override
-    public Long isExist(Long id) {
-        return gymClassRepository.isExist(id);
-    }
 
     @Override
     public ResponseEntity<Page<GymClass>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(pageable);
+        Page<GymClass> classes = gymClassRepository.findAll(pageable);
 
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }
 
     @Override
     @Cacheable(cacheNames = "gymClass", key = "#id")
-    public ResponseEntity<GymClass> findOne(Long id) {
-        GymClass gymCLassFromDb = gymClassRepository.getReferenceById(id);
+    public ResponseEntity<?> findOne(Long id) {
+        GymClass gymClass = gymClassRepository.findById(id).orElse(null);
+
+        if(gymClass == null) return ApiMessage.errorResponse("Gym class not found");
+
         return new ResponseEntity<GymClass>(
-                GymClass.buildGymClassFromReference(gymCLassFromDb),
+                gymClass,
                 HttpStatus.OK);
     }
 

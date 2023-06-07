@@ -11,6 +11,4 @@ import com.kurt.gym.helper.service.BaseService;
 public interface CustomerService extends BaseService<Customer> {
 
     ResponseEntity<Page<Customer>> data(String search,  int size, int page);
-
-    ResponseEntity<Customer> findOne(Long id);
 }

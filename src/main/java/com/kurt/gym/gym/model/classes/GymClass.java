@@ -52,7 +52,7 @@ public class GymClass {
         this.dateEnd = dateEnd;
     }
     
-    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Schedule> schedules;
 
     @OneToOne(cascade = CascadeType.ALL)

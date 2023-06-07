@@ -10,6 +10,4 @@ import com.kurt.gym.helper.service.BaseService;
 @Service
 public interface EmployeeService extends BaseService<Employee>{
     ResponseEntity<Page<Employee>> data(String search,  int size, int page);
-
-    ResponseEntity<Employee> findOne(Long id);
 }
