@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface BaseService<T>{
+
+    ResponseEntity<?> data(String search, int size, int page);
    
     ResponseEntity<?> save(T t);
    

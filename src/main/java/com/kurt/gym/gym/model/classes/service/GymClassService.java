@@ -9,5 +9,5 @@ import com.kurt.gym.helper.service.BaseService;
 
 @Service
 public interface GymClassService extends BaseService<GymClass> {
-    ResponseEntity<Page<GymClass>> data(String search, int size, int page);
+    
 }

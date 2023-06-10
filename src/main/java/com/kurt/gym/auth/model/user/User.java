@@ -5,6 +5,7 @@ import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,18 +33,21 @@ public class User {
     private String firstName;
     private String lastName;
     private String middleName;
+
+    @Column(unique = true)
     private String email;
+    
     private String password;
+
+    @Column(unique = true)
     private String cellphone;
     private String sex;
     private String suffix;
     private Date birthDate;
-    private String rfID;
     private String bmi;
     private Float bmiNumber;
     private Double weight;
     private Double height;
-    private Boolean isMember;
     private Date membershipDateStart;
     private Date membershipDateEnd;
     private Date lastIn;

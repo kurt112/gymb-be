@@ -39,7 +39,7 @@ public class GymClassServiceImpl implements GymClassService {
 
         if(gymClass == null) return ApiMessage.errorResponse("GymClass not found");
 
-        return ApiMessage.successResponse("GymClass deleted")l
+        return ApiMessage.successResponse("GymClass deleted");
     }
 
     @Override
@@ -49,7 +49,7 @@ public class GymClassServiceImpl implements GymClassService {
 
         if(gymClass == null) return ApiMessage.errorResponse("GymClass not found");
 
-        return ApiMessage.successResponse("GymClass deleted")l
+        return ApiMessage.successResponse("GymClass deleted");
     }
 
 

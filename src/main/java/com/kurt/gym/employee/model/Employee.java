@@ -31,6 +31,8 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    private String rfID;
 
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn

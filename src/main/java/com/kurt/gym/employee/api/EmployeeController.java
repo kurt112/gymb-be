@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.employee.services.EmployeeService;
-import com.kurt.gym.helper.service.ApiMessage;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,10 +33,6 @@ public class EmployeeController {
 
    @GetMapping("/{id}")
     public ResponseEntity<?> getEmployee(@PathVariable Long id){
-        if(employeeService.isExist(id) == null){
-            return ApiMessage.errorResponse("Employee Not Found");
-        }
-
         return employeeService.findOne(id);
     }
 

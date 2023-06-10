@@ -45,4 +45,10 @@ public class MembershipWithUserServiceImpl implements MembershipWithUserService 
         return new ResponseEntity<>(membershipWithUser, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<?> data(String search, int size, int page) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'data'");
+    }
+
 }

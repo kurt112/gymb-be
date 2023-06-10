@@ -3,6 +3,9 @@ package com.kurt.gym.gym.model.membership.service;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,11 +46,6 @@ public class MembershipServiceImpl implements MembershipService {
         return ApiMessage.successResponse("Membership deleted");
     }
 
-    @Override
-    public Long isExist(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isExist'");
-    }
 
     @Override
     @Cacheable(value = "memebership", key = "#id")
@@ -57,6 +55,14 @@ public class MembershipServiceImpl implements MembershipService {
        if (membership == null) return ApiMessage.errorResponse("No Membership Found");
 
        return new ResponseEntity<Membership>(membership, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> data(String search, int size, int page) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Membership> memberships = membershipRepository.findAllByOrderByCreatedAtDesc(pageable);
+
+        return new ResponseEntity<>(memberships, HttpStatus.OK);
     }
     
 }

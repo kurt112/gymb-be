@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.customer.model.Customer;
 import com.kurt.gym.customer.model.services.CustomerService;
-import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,19 +24,24 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<?> getCustomers(
-        @RequestParam("page") int page, 
-        @RequestParam("size") int size, 
-        @RequestParam("search") String search) {
-        
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("search") String search) {
 
-        return customerService.data(search, size, page -1);
+        return customerService.data(search, size, page - 1);
     }
 
-   @GetMapping("/{id}")
-    public ResponseEntity<?> getCustomer(@PathVariable Long id){
-        if(customerService.isExist(id) == null){
-            return ApiMessage.errorResponse("Customer Not Found");
-        }
+    @GetMapping("/today")
+    public ResponseEntity<?> getTodayCustomers(
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("search") String search) {
+
+        return customerService.getTodaysCustomer(search, size, page - 1);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCustomer(@PathVariable Long id) {
 
         return customerService.findOne(id);
     }
@@ -48,8 +52,11 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCustomer(@PathVariable Long id){
+    public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
         return customerService.deleteById(id);
     }
-        
+    @GetMapping("attendance/{rfId}")
+    public ResponseEntity<?> updateCustomerAttendanceByRfid( @PathVariable String rfId) {
+        return customerService.updateCustomerAttendaceByRfId(rfId);
+    }
 }

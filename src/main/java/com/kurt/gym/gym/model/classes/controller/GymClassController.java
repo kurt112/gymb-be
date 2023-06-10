@@ -1,6 +1,5 @@
 package com.kurt.gym.gym.model.classes.controller;
 
-import org.hibernate.sql.results.LoadingLogger_.logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.gym.model.classes.GymClass;
 import com.kurt.gym.gym.model.classes.service.GymClassService;
-import com.kurt.gym.helper.service.ApiMessage;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -40,10 +37,6 @@ public class GymClassController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getEmployee(@PathVariable Long id){
-        if(gymClassService.isExist(id) == null){
-            return ApiMessage.errorResponse("Gym Class Not Found");
-        }
-
         return gymClassService.findOne(id);
     }
 
