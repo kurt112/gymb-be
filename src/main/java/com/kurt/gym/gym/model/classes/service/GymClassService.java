@@ -1,7 +1,5 @@
 package com.kurt.gym.gym.model.classes.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kurt.gym.gym.model.classes.GymClass;

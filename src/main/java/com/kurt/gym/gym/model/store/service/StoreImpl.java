@@ -34,11 +34,21 @@ public class StoreImpl implements StoreService {
     }
 
     @Override
-    public Long isExist(Long id) {
+    public ResponseEntity<?> data(String search, int size, int page) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isExist'");
+        throw new UnsupportedOperationException("Unimplemented method 'data'");
+    }
+
+    @Override
+    public ResponseEntity<?> findOne(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findOne'");
+    }
+
+    @Override
+    public Store referencedById(Long id) {
+        return storeRepository.getReferenceById(id);
     }
 
 
-    
 }

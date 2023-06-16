@@ -51,4 +51,9 @@ public class MembershipWithUserServiceImpl implements MembershipWithUserService 
         throw new UnsupportedOperationException("Unimplemented method 'data'");
     }
 
+    @Override
+    public MembershipWithUser referencedById(Long id) {
+        return membershipWithUserRepository.getReferenceById(id);
+    }
+
 }

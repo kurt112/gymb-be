@@ -19,6 +19,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,7 +57,10 @@ public class Customer {
 
     private Boolean isOut;
 
+    @Temporal(TemporalType.DATE)
     private Date timeIn;
+    
+    @Temporal(TemporalType.DATE)
     private Date timeOut;
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

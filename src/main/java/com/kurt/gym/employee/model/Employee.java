@@ -7,6 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.kurt.gym.auth.model.user.User;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +33,7 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(unique = true)
     private String rfID;
 
     @OneToOne(cascade=CascadeType.ALL)

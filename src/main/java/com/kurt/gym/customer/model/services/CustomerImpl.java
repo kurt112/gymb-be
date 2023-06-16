@@ -99,6 +99,19 @@ public class CustomerImpl implements CustomerService {
 
         Customer customer = customerRepository.getReferenceById(customerId);
 
+        Calendar currenDate = Calendar.getInstance();
+        currenDate.setTime(new Date());
+
+        if (!customer.getIsMember()) {
+            throw new UnsupportedOperationException("Customer is not a member");
+        }
+
+        if (currenDate.getTime().after(customer.getMembershipDuration())) {
+            customer.setIsMember(false);
+            customerRepository.save(customer);
+            throw new UnsupportedOperationException("Membership expired!");
+        }
+
         boolean isCustomerIsOut = customer.getIsOut();
         String message = "Time In Successful";
         if (isCustomerIsOut) {
@@ -107,12 +120,6 @@ public class CustomerImpl implements CustomerService {
         } else if (customer.getTimeIn() == null) {
             customer.setTimeIn(new Date());
         } else {
-            Set<CustomerAttendance> customerAttendance = customer.getCustomerAttendance();
-            customerAttendance.add(CustomerAttendance.builder()
-                    .customer(customer)
-                    .timeIn(customer.getTimeIn())
-                    .timeOut(customer.getTimeOut())
-                    .build());
             Calendar currentDate = Calendar.getInstance();
             Calendar customerDate = Calendar.getInstance();
             customerDate.setTime(customer.getTimeIn());
@@ -120,9 +127,15 @@ public class CustomerImpl implements CustomerService {
             if (currentDate.get(Calendar.YEAR) == customerDate.get(Calendar.YEAR)
                     && currentDate.get(Calendar.MONTH) == customerDate.get(Calendar.MONTH)
                     && currentDate.get(Calendar.DAY_OF_MONTH) == customerDate.get(Calendar.DAY_OF_MONTH)) {
-                customer.setTimeOut(new Date());
+                customer.setTimeIn(new Date());
             } else {
-                customer.setTimeIn(null);
+                Set<CustomerAttendance> customerAttendance = customer.getCustomerAttendance();
+                customerAttendance.add(CustomerAttendance.builder()
+                        .customer(customer)
+                        .timeIn(customer.getTimeIn())
+                        .timeOut(customer.getTimeOut())
+                        .build());
+                customer.setTimeIn(new Date());
                 customer.setTimeOut(null);
                 customer.setCustomerAttendance(customerAttendance);
             }
@@ -150,6 +163,11 @@ public class CustomerImpl implements CustomerService {
         Page<Customer> customers = customerRepository.todaysCustomer(pageable);
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
+    }
+
+    @Override
+    public Customer referencedById(Long id) {
+        return customerRepository.getReferenceById(id);
     }
 
 }

@@ -19,6 +19,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     Page<Customer> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    @Query("select new com.kurt.gym.customer.model.Customer(e.id, e.user, e.timeIn, e.timeOut, e.membershipDuration) from Customer e where e.timeIn is not null")
+    @Query("select new com.kurt.gym.customer.model.Customer(e.id, e.user, e.timeIn, e.timeOut, e.membershipDuration) from Customer e where e.timeIn >= CURRENT_DATE")
     Page<Customer> todaysCustomer(Pageable pageable);
 }

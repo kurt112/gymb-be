@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.auth.model.services.user.UserService;
 import com.kurt.gym.auth.model.user.User;
-import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,19 +24,15 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> getUsers(
-        @RequestParam("page") int page, 
-        @RequestParam("size") int size, 
-        @RequestParam("search") String search) {
-        
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("search") String search) {
 
-            return userService.data(search, size, page -1);
+        return userService.data(search, size, page - 1);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@PathVariable Long id){
-        if(userService.isExist(id) == null){
-            return ApiMessage.errorResponse("User Not Found");
-        }
+    public ResponseEntity<?> getUser(@PathVariable Long id) {
 
         return userService.findOne(id);
     }
@@ -48,7 +43,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userService.deleteById(id);
     }
 

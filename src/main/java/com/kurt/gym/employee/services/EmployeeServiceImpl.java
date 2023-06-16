@@ -73,4 +73,9 @@ public class EmployeeServiceImpl implements EmployeeService {
                 Employee.buildEmployeeFromReference(employeeFromDb),
                 HttpStatus.OK);
     }
+
+    @Override
+    public Employee referencedById(Long id) {
+    return employeeRepository.getReferenceById(id);
+    }
 }

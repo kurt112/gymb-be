@@ -42,11 +42,6 @@ public class UserServiceImplementation implements UserService{
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @Override
-    public Long isExist(Long id) {
-
-        return userRepository.isUserExist(id);
-    }
 
     @Override
     public ResponseEntity<User> findOne(Long id) {
@@ -56,13 +51,15 @@ public class UserServiceImplementation implements UserService{
 
     @Override
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
-        if(isExist(id) == null){
-            return ApiMessage.errorResponse("User does not exist");
-        }
         
         userRepository.deleteById(id);
 
         return ApiMessage.successResponse("User deleted successfully");
     }
-    
+
+    @Override
+    public User referencedById(Long id) {
+        return userRepository.getReferenceById(id);
+    }
+
 }

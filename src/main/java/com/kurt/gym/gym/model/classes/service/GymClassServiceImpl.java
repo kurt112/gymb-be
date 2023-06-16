@@ -37,7 +37,8 @@ public class GymClassServiceImpl implements GymClassService {
     public ResponseEntity<?> delete(GymClass t) {
         GymClass gymClass = gymClassRepository.findById(t.getId()).orElse(null);
 
-        if(gymClass == null) return ApiMessage.errorResponse("GymClass not found");
+        if (gymClass == null)
+            return ApiMessage.errorResponse("GymClass not found");
 
         return ApiMessage.successResponse("GymClass deleted");
     }
@@ -47,11 +48,11 @@ public class GymClassServiceImpl implements GymClassService {
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
 
-        if(gymClass == null) return ApiMessage.errorResponse("GymClass not found");
+        if (gymClass == null)
+            return ApiMessage.errorResponse("GymClass not found");
 
         return ApiMessage.successResponse("GymClass deleted");
     }
-
 
     @Override
     public ResponseEntity<Page<GymClass>> data(String search, int size, int page) {
@@ -66,11 +67,17 @@ public class GymClassServiceImpl implements GymClassService {
     public ResponseEntity<?> findOne(Long id) {
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
 
-        if(gymClass == null) return ApiMessage.errorResponse("Gym class not found");
+        if (gymClass == null)
+            return ApiMessage.errorResponse("Gym class not found");
 
         return new ResponseEntity<GymClass>(
                 gymClass,
                 HttpStatus.OK);
+    }
+
+    @Override
+    public GymClass referencedById(Long id) {
+        return gymClassRepository.getReferenceById(id);
     }
 
 }
