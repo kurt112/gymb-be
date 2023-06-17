@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.gym.model.classes.GymClass;
-import com.kurt.gym.gym.model.classes.service.GymClassService;
+import com.kurt.gym.gym.model.classes.service.GymClass.GymClassService;
+import com.kurt.gym.gym.model.classes.service.gymClassWithUser.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class GymClassController {
 
     private final GymClassService gymClassService;
+    private final GymClassWithUserService gymClassWithUserService;
 
     @GetMapping
     public ResponseEntity<?> getClasses(
@@ -51,6 +53,14 @@ public class GymClassController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getEmployee(@PathVariable Long id) {
         return gymClassService.findOne(id);
+    }
+
+    @GetMapping("/{id}/members")
+    public ResponseEntity<?> getGymClassMembers( @PathVariable long id,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("search") String search){
+        return gymClassService.getGymClassMembers(id, search, size, page - 1);
     }
 
 }

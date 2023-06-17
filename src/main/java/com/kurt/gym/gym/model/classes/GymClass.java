@@ -40,8 +40,10 @@ public class GymClass {
 
     private String name;
     private String type;
+    private double price;
     private Date dateStart;
     private Date dateEnd;
+    private Integer session;
 
     // this is for custom fetching in table if you want to fetch another create another constructor method
     public GymClass(Long id, String name, String type, Date dateStart, Date dateEnd){

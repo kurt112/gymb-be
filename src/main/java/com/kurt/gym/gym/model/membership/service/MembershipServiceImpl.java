@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class MembershipServiceImpl implements MembershipService {
 
     private final MembershipRepository membershipRepository;
-    private final MembershipWithUserRepository membershipWithUserRMembershipWithUserRepository;
+    private final MembershipWithUserRepository membershipWithUserRepository;
     private final CustomerRepository customerRepository;
 
     @Override
@@ -99,7 +99,7 @@ public class MembershipServiceImpl implements MembershipService {
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
 
         if (customerId == null) {
-             throw new UnsupportedOperationException("No Customer Found");
+            throw new UnsupportedOperationException("No Customer Found");
         }
 
         Customer customer = customerRepository.getReferenceById(customerId);
@@ -107,18 +107,20 @@ public class MembershipServiceImpl implements MembershipService {
         Membership membership = membershipRepository.getReferenceById(membershipId);
 
         if (membership == null) {
-           throw new UnsupportedOperationException("Unimplemented method membership null");
+            throw new UnsupportedOperationException("Unimplemented method membership null");
         }
 
-        if(currentDate.getTime().after(customer.getMembershipDuration())){
+        if (currentDate.getTime().after(membership.getMembershipPromoExpiration())) {
+            throw new UnsupportedOperationException("Membership promo expired");
+        }
+
+        if (currentDate.getTime().after(customer.getMembershipDuration())) {
             customer.setIsMember(false);
         }
-    
-        if(customer.getIsMember()){
+
+        if (customer.getIsMember()) {
             throw new UnsupportedOperationException("Customer is already a member!");
         }
-
-        
 
         Calendar endDate = Calendar.getInstance();
         endDate.setTime(new Date());
@@ -140,7 +142,7 @@ public class MembershipServiceImpl implements MembershipService {
                 .endDate(endDate.getTime())
                 .build();
 
-        membershipWithUserRMembershipWithUserRepository.save(membershipWithUser);
+        membershipWithUserRepository.save(membershipWithUser);
 
         customer.setIsMember(true);
         customer.setMembershipDuration(endDate.getTime());
@@ -148,6 +150,38 @@ public class MembershipServiceImpl implements MembershipService {
         customerRepository.save(customer);
 
         return ApiMessage.successResponse("Membership enrolled successfully");
+    }
+
+    @Override
+    public ResponseEntity<?> unEnrollMembershipCustomer(String rfId) {
+        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+
+        if (customerId == null) {
+            throw new UnsupportedOperationException("No Customer Found");
+        }
+
+        Customer customer = customerRepository.getReferenceById(customerId);
+
+        customer.setIsMember(false);
+        customer.setMembershipDuration(null);
+
+        Long membershipWithUserId = membershipWithUserRepository.getMembershipWithUserId(customer.getUser().getId());
+
+        if(membershipWithUserId == null){
+            throw new UnsupportedOperationException("No Current Membership");
+        }
+
+        MembershipWithUser membershipWithUser = membershipWithUserRepository.getReferenceById(membershipWithUserId);
+
+        if(membershipWithUser == null){
+            throw new UnsupportedOperationException("No Membership With User Found");
+        }
+
+        membershipWithUser.setIsActive(false);
+        membershipWithUserRepository.save(membershipWithUser);
+        customerRepository.save(customer);
+
+        return ApiMessage.successResponse("Customer membership pull out successfully");
     }
 
 }

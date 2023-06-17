@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.model.classes.service;
+package com.kurt.gym.gym.model.classes.service.GymClass;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;

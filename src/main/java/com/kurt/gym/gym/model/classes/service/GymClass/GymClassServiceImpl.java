@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.model.classes.service;
+package com.kurt.gym.gym.model.classes.service.GymClass;
 
 import java.util.HashMap;
 
@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kurt.gym.gym.model.classes.GymClass;
+import com.kurt.gym.gym.model.classes.GymClassWithUser;
+import com.kurt.gym.gym.model.classes.service.gymClassWithUser.GymClassWithUserRepositoy;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class GymClassServiceImpl implements GymClassService {
 
     private final GymClassRepository gymClassRepository;
+    private final GymClassWithUserRepositoy gymClassWithUserRepositoy;
 
     @Override
     @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
@@ -78,6 +81,14 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     public GymClass referencedById(Long id) {
         return gymClassRepository.getReferenceById(id);
+    }
+
+    @Override
+    public ResponseEntity<?> getGymClassMembers(long gymClassId, String search, int size, int page) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<GymClassWithUser> gymClassWithUser = gymClassWithUserRepositoy.getGymClassMembers(gymClassId, pageable);
+
+        return new ResponseEntity<>(gymClassWithUser, HttpStatus.OK);
     }
 
 }

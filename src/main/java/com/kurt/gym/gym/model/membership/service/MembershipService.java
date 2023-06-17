@@ -11,4 +11,6 @@ public interface MembershipService extends BaseService<Membership> {
 
     ResponseEntity<?> enrollCustomer(String rfId, long membershipId);
 
+    ResponseEntity<?> unEnrollMembershipCustomer(String rfId);
+
 }
