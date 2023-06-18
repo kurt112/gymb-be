@@ -41,12 +41,14 @@ public class GymClassController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> addGymClass(@PathVariable Long id,@RequestBody GymClass gymClass) {
-        
-        if(id != gymClass.getId()) return ApiMessage.errorResponse("id is not equal to the id in payload");
+    public ResponseEntity<?> addGymClass(@PathVariable Long id, @RequestBody GymClass gymClass) {
 
-        if(gymClassService.findOne(id) == null) return ApiMessage.errorResponse("Gym class not found");
-        
+        if (id != gymClass.getId())
+            return ApiMessage.errorResponse("id is not equal to the id in payload");
+
+        if (gymClassService.findOne(id) == null)
+            return ApiMessage.errorResponse("Gym class not found");
+
         return gymClassService.save(gymClass);
     }
 
@@ -55,11 +57,21 @@ public class GymClassController {
         return gymClassService.findOne(id);
     }
 
+    @PostMapping("/{gymClassId}/enroll-customer/{rfId}")
+    public ResponseEntity<?> enrollCustomer(@PathVariable Long gymClassId, @PathVariable String rfId) {
+        return gymClassService.enrollCustomer(rfId, gymClassId);
+    }
+
+    @PostMapping("/{gymClassId}/un-enroll-customer/{rfId}")
+    public ResponseEntity<?> unEnrollCustomer(@PathVariable Long gymClassId, @PathVariable String rfId) {
+        return gymClassService.unEnrollGymClassCustomer(rfId, gymClassId);
+    }
+
     @GetMapping("/{id}/members")
-    public ResponseEntity<?> getGymClassMembers( @PathVariable long id,
+    public ResponseEntity<?> getGymClassMembers(@PathVariable long id,
             @RequestParam("page") int page,
             @RequestParam("size") int size,
-            @RequestParam("search") String search){
+            @RequestParam("search") String search) {
         return gymClassService.getGymClassMembers(id, search, size, page - 1);
     }
 

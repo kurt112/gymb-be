@@ -1,5 +1,6 @@
 package com.kurt.gym.gym.model.classes.service.GymClass;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.kurt.gym.customer.model.Customer;
+import com.kurt.gym.customer.model.services.CustomerRepository;
 import com.kurt.gym.gym.model.classes.GymClass;
 import com.kurt.gym.gym.model.classes.GymClassWithUser;
 import com.kurt.gym.gym.model.classes.service.gymClassWithUser.GymClassWithUserRepositoy;
@@ -25,6 +28,7 @@ public class GymClassServiceImpl implements GymClassService {
 
     private final GymClassRepository gymClassRepository;
     private final GymClassWithUserRepositoy gymClassWithUserRepositoy;
+    private final CustomerRepository customerRepository;
 
     @Override
     @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
@@ -89,6 +93,62 @@ public class GymClassServiceImpl implements GymClassService {
         Page<GymClassWithUser> gymClassWithUser = gymClassWithUserRepositoy.getGymClassMembers(gymClassId, pageable);
 
         return new ResponseEntity<>(gymClassWithUser, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> enrollCustomer(String rfId, long gymClassId) {
+
+        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+
+        if (customerId == null) {
+            return ApiMessage.errorResponse("No Customer Found");
+        }
+
+        GymClass gymClass = gymClassRepository.getReferenceById(gymClassId);
+
+        if (gymClass == null) {
+            return ApiMessage.errorResponse("Gym Class Not Found");
+        }
+
+        Customer customer = customerRepository.getReferenceById(customerId);
+
+        GymClassWithUser gymClassWithUser = GymClassWithUser.builder()
+                .currentEnroll(customer.getUser())
+                .dateStart(new Date())
+                .gymClass(gymClass)
+                .session(gymClass.getSession())
+                .isActive(true)
+                .build();
+
+        gymClassWithUserRepositoy.save(gymClassWithUser);
+
+        return ApiMessage.successResponse("Customer successfully enrolled");
+    }
+
+    @Override
+    public ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId) {
+        
+        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+
+         if (customerId == null) {
+            return ApiMessage.errorResponse("No Customer Found");
+        }
+
+        Customer customer = customerRepository.getReferenceById(customerId);
+
+        System.out.println(gymClassId + " " + customer.getUser().getId());
+    
+        Long gymClassWithUserId = gymClassWithUserRepositoy.getGymClassWithUser(gymClassId, customer.getUser().getId());
+
+        // if(gymClassWithUserId == null) return ApiMessage.errorResponse("Customer not currently enrolled in this class");
+
+        // GymClassWithUser gymClassWithUser = gymClassWithUserRepositoy.getReferenceById(gymClassWithUserId);
+
+        // gymClassWithUser.setIsActive(false);
+
+        // gymClassWithUserRepositoy.save(gymClassWithUser);
+
+        return ApiMessage.successResponse("Customer successfully remove from this class");
     }
 
 }

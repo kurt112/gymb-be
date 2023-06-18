@@ -10,4 +10,8 @@ import com.kurt.gym.helper.service.BaseService;
 public interface GymClassService extends BaseService<GymClass> {
 
     ResponseEntity<?> getGymClassMembers(long gymClassId, String search, int size, int page);
+
+    ResponseEntity<?> enrollCustomer(String rfId, long gymClassId);
+
+    ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId);
 }

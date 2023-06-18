@@ -10,7 +10,7 @@ import com.kurt.gym.gym.model.classes.GymClass;
 import jakarta.transaction.Transactional;
 
 @Transactional
-public interface GymClassRepository extends JpaRepository<GymClass, Long>{
+public interface GymClassRepository extends JpaRepository<GymClass, Long> {
     @Query("select e.id from GymClass e where e.id = ?1")
     Long isExist(Long id);
 
