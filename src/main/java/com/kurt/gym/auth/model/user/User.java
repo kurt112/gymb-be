@@ -1,15 +1,22 @@
 package com.kurt.gym.auth.model.user;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.kurt.gym.gym.store.Store;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,6 +58,13 @@ public class User {
     private Date membershipDateStart;
     private Date membershipDateEnd;
     private Date lastIn;
+
+    private BigDecimal pointsAmount;
+    private BigDecimal cardValue;   
+
+    @ManyToOne
+    @JoinColumn(name = "assign_store")
+    private Store store;
         
 
     @CreationTimestamp

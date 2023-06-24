@@ -15,6 +15,6 @@ public enum Charges {
     QUERTERLY(4),
     SEMI_ANNUAL(5);
 
-    final int value;
+    private final int value;
 
 }

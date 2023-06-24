@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -51,7 +52,7 @@ public class Customer {
     private short membershipLevel;
 
     @Column(unique = true)
-    private String rfID;
+    private String rfId;
 
     private Boolean isMember;
 
@@ -59,7 +60,7 @@ public class Customer {
 
     @Temporal(TemporalType.DATE)
     private Date timeIn;
-    
+
     @Temporal(TemporalType.DATE)
     private Date timeOut;
 
@@ -90,6 +91,17 @@ public class Customer {
                 .membershipLevel(customer.getMembershipLevel())
                 .user(customer.getUser())
                 .build();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if(isMember == null){
+            this.isMember = false;
+        }
+
+        if(isOut == null){
+            this.isOut = false;
+        }
     }
 
 }

@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.customer.model.Customer;
-import com.kurt.gym.customer.model.services.CustomerService;
+import com.kurt.gym.customer.services.CustomerService;
 import com.kurt.gym.helper.service.ApiMessage;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -49,11 +48,13 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody Customer customer){
+    public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
 
-        if(id != customer.getId()) return ApiMessage.errorResponse("Id not equal to id in body");
+        if (id != customer.getId())
+            return ApiMessage.errorResponse("Id not equal to id in body");
 
-        if(customerService.referencedById(id) == null) return ApiMessage.errorResponse("Customer not found"); 
+        if (customerService.referencedById(id) == null)
+            return ApiMessage.errorResponse("Customer not found");
 
         return customerService.save(customer);
     }
@@ -72,4 +73,20 @@ public class CustomerController {
     public ResponseEntity<?> updateCustomerAttendanceByRfid(@PathVariable String rfId) {
         return customerService.updateCustomerAttendaceByRfId(rfId);
     }
+
+    @PostMapping("/top-up/{assignUserToken}/{userId}")
+    public ResponseEntity<?> postMethodName(@PathVariable String assignUserToken,
+            @PathVariable long userId, @RequestParam(value = "amount") double amount) {
+        // TODO: process POST request
+
+        return customerService.topUpCustomer(assignUserToken,userId,amount);
+    }
+
+    @GetMapping("/get-user-id/{rfId}")
+    public ResponseEntity<?> getUserIdByRfId(@PathVariable String rfId) {
+
+
+        return customerService.getUserIdByCustomerRfId(rfId);
+    }
+
 }
