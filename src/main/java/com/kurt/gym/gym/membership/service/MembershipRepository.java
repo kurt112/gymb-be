@@ -16,5 +16,5 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
     Page<Membership> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("select new com.kurt.gym.gym.membership.model.MembershipWithUser(e.id, e.charge, e.startDate, e.endDate, e.lastCharge, e.isActive, e.price, e.currentEnroll) from MembershipWithUser e where e.membership.id = ?1")
-    Page<MembershipWithUser> getmembershipMembers(Long membershipId, Pageable pageable);
+    Page<MembershipWithUser> getmembershipMembers(Long membershipId, Pageable pageable);    
 }

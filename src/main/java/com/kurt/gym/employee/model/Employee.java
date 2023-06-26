@@ -54,4 +54,9 @@ public class Employee {
         .updatedAt(employee.getUpdatedAt())
         .build();
     }
+
+    public Employee(long id, User user) {
+        this.id = id;
+        this.user = user;
+    }
 }

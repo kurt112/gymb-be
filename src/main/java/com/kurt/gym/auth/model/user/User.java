@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.kurt.gym.gym.store.Store;
@@ -16,7 +15,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,7 +58,10 @@ public class User {
     private Date lastIn;
 
     private BigDecimal pointsAmount;
-    private BigDecimal cardValue;   
+    private BigDecimal cardValue;
+    
+    private String role;
+
 
     @ManyToOne
     @JoinColumn(name = "assign_store")
@@ -72,4 +73,24 @@ public class User {
     
     @UpdateTimestamp
     private Date updatedAt;
+
+    // for customer and employee table
+    // do not change the order!!!!
+    public User (String firstName, String lastName, Date birthDate, String sex, String cellphone, String email){
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.sex = sex;
+        this.cellphone = cellphone;
+        this.email = email;
+    }
+
+    // for customer attendance table
+    // do not change the order!!!!
+    public User(String firstName, String lastName, BigDecimal pointsAmount, BigDecimal cardValue){
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.pointsAmount = pointsAmount;
+        this.cardValue = cardValue;
+    }
 }

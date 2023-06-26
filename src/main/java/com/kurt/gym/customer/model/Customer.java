@@ -73,6 +73,7 @@ public class Customer {
     @UpdateTimestamp
     private Date updatedAt;
 
+    // for customer attendance table
     public Customer(long id, User user, Date timeIn, Date timeOut, Date membershipDuration) {
         this.id = id;
         this.user = user;
@@ -102,6 +103,12 @@ public class Customer {
         if(isOut == null){
             this.isOut = false;
         }
+    }
+    
+    // for customer and employee table
+    public Customer (long id, User user) {
+        this.id = id;
+        this.user = user;
     }
 
 }
