@@ -75,7 +75,7 @@ public class CustomerImpl implements CustomerService {
     @Override
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Customer> customers = customerRepository.findAllByOrderByCreatedAtDesc(pageable);
+        Page<Customer> customers = customerRepository.findAllByOrderByCreatedAtDesc(search,pageable);
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }

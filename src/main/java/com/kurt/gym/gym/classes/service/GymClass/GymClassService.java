@@ -14,4 +14,6 @@ public interface GymClassService extends BaseService<GymClass> {
     ResponseEntity<?> enrollCustomer(String rfId, long gymClassId);
 
     ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId);
+
+    ResponseEntity<?> getGymClasses();
 }

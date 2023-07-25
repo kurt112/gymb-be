@@ -2,6 +2,7 @@ package com.kurt.gym.gym.classes.service.GymClass;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -158,5 +159,13 @@ public class GymClassServiceImpl implements GymClassService {
 
         return ApiMessage.successResponse("Customer successfully remove from this class");
     }
+
+    @Override
+    public ResponseEntity<?> getGymClasses() {
+        List<GymClass> list = gymClassRepository.getGymClassesSchedule();
+        
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
 
 }

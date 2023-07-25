@@ -1,5 +1,7 @@
 package com.kurt.gym.gym.classes.controller;
 
+import java.util.Date;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,6 +75,11 @@ public class GymClassController {
             @RequestParam("size") int size,
             @RequestParam("search") String search) {
         return gymClassService.getGymClassMembers(id, search, size, page - 1);
+    }
+
+    @GetMapping("/schedules")
+      public ResponseEntity<?> gymClassSchedule() {
+       return gymClassService.getGymClasses();
     }
 
 }

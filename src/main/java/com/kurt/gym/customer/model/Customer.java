@@ -56,6 +56,7 @@ public class Customer {
 
     private Boolean isMember;
 
+    // for attendace if the customer is out or in in gym
     private Boolean isOut;
 
     @Temporal(TemporalType.DATE)

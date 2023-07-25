@@ -45,15 +45,9 @@ public class GymClass {
     private Date dateEnd;
     private Integer session;
     private Boolean allowedNonMembers;
+    private Boolean isActive;
 
-    // this is for custom fetching in table if you want to fetch another create another constructor method
-    public GymClass(Long id, String name, String type, Date dateStart, Date dateEnd){
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.dateStart = dateStart;
-        this.dateEnd = dateEnd;
-    }
+   
     
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Schedule> schedules;
@@ -68,6 +62,8 @@ public class GymClass {
     @UpdateTimestamp
     private Date updatedAt;
 
+    
+
     public static GymClass buildGymClassFromReference(GymClass gymClass){
         return GymClass.builder()
         .id(gymClass.getId())
@@ -80,5 +76,21 @@ public class GymClass {
         .schedules(gymClass.getSchedules())
         .build();
     }
+    // please dont' change this constructor using for gym repositories
+    public GymClass(long id, String name, String type, Set<Schedule> schedules){
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.schedules = schedules;
+    }
 
+
+     // this is for custom fetching in table if you want to fetch another create another constructor method
+    public GymClass(Long id, String name, String type, Date dateStart, Date dateEnd){
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.dateStart = dateStart;
+        this.dateEnd = dateEnd;
+    }
 }
