@@ -1,8 +1,12 @@
 package com.kurt.gym.gym.classes.service.GymClass;
 
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -20,6 +24,8 @@ import com.kurt.gym.gym.classes.model.GymClass;
 import com.kurt.gym.gym.classes.model.GymClassWithUser;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserRepositoy;
 import com.kurt.gym.helper.service.ApiMessage;
+import com.kurt.gym.schedule.model.Schedule;
+import com.kurt.gym.schedule.model.ScheduleData;
 
 import lombok.RequiredArgsConstructor;
 
@@ -113,13 +119,13 @@ public class GymClassServiceImpl implements GymClassService {
 
         Customer customer = customerRepository.getReferenceById(customerId);
 
-        if(!gymClass.getAllowedNonMembers() && !customer.getIsMember()){
+        if (!gymClass.getAllowedNonMembers() && !customer.getIsMember()) {
             return ApiMessage.errorResponse("Customer is not subscribed to any membership");
         }
 
         Long gymClassWithUserId = gymClassWithUserRepositoy.getGymClassWithUser(gymClassId, customer.getUser().getId());
 
-        if(gymClassWithUserId != null){
+        if (gymClassWithUserId != null) {
             return ApiMessage.errorResponse("Customer already enrolled in this class");
         }
 
@@ -138,18 +144,19 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     public ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId) {
-        
+
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
 
-         if (customerId == null) {
+        if (customerId == null) {
             return ApiMessage.errorResponse("No Customer Found");
         }
 
         Customer customer = customerRepository.getReferenceById(customerId);
-    
+
         Long gymClassWithUserId = gymClassWithUserRepositoy.getGymClassWithUser(gymClassId, customer.getUser().getId());
 
-        if(gymClassWithUserId == null) return ApiMessage.errorResponse("Customer not currently enrolled in this class");
+        if (gymClassWithUserId == null)
+            return ApiMessage.errorResponse("Customer not currently enrolled in this class");
 
         GymClassWithUser gymClassWithUser = gymClassWithUserRepositoy.getReferenceById(gymClassWithUserId);
 
@@ -163,9 +170,60 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     public ResponseEntity<?> getGymClasses() {
         List<GymClass> list = gymClassRepository.getGymClassesSchedule();
-        
+
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<?> generateGymClassSchedule(long gymClassId, List<ScheduleData> scheduleDatas) {
+
+        GymClass currentGymClass = gymClassRepository.getReferenceById(gymClassId);
+
+        if (currentGymClass == null) {
+            return ApiMessage.errorResponse("No Gym Class Found");
+        }
+
+        Calendar dateStart = Calendar.getInstance();
+        dateStart.setTime(currentGymClass.getDateStart());
+
+        Calendar dateEnd = Calendar.getInstance();
+        dateEnd.setTime(currentGymClass.getDateEnd());
+
+        // Looping the scheudle data so that we can assure the arrange ment of scheyudle
+        // with day
+        Collections.sort(scheduleDatas);
+
+        Set<Schedule> schedules = new HashSet<>();
+
+        while (dateStart.before(dateEnd)) {
+
+            int currentDay = dateStart.get(Calendar.DAY_OF_WEEK) - 1;
+
+            Date startDateWithTime = scheduleDatas.get(currentDay).getStartTime();
+            Date endDateWithTime = scheduleDatas.get(currentDay).getEndTime();
+
+            Calendar startDateWithTimeCalendar = Calendar.getInstance();
+            startDateWithTimeCalendar.setTime(startDateWithTime);
+            startDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR), dateStart.get(Calendar.MONTH),
+                    dateStart.get(Calendar.DAY_OF_MONTH));
+
+            Calendar endDateWithTimeCalendar = Calendar.getInstance();
+            endDateWithTimeCalendar.setTime(endDateWithTime);
+            endDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR), dateStart.get(Calendar.MONTH),
+                    dateStart.get(Calendar.DAY_OF_MONTH));
+
+            Schedule schedule = Schedule
+                    .builder()
+                    .endTime(endDateWithTimeCalendar.getTime())
+                    .startTime(startDateWithTimeCalendar.getTime())
+                    .build();
+
+            schedules.add(schedule);
+
+        }
+
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateGymClassSchedule'");
+    }
 
 }

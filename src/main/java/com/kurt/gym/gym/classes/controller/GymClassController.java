@@ -1,6 +1,6 @@
 package com.kurt.gym.gym.classes.controller;
 
-import java.util.Date;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +16,8 @@ import com.kurt.gym.gym.classes.model.GymClass;
 import com.kurt.gym.gym.classes.service.GymClass.GymClassService;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
+import com.kurt.gym.schedule.model.Schedule;
+import com.kurt.gym.schedule.model.ScheduleData;
 
 import lombok.RequiredArgsConstructor;
 
@@ -80,6 +82,14 @@ public class GymClassController {
     @GetMapping("/schedules")
       public ResponseEntity<?> gymClassSchedule() {
        return gymClassService.getGymClasses();
+    }
+
+    @PostMapping("/{id}/generate-schedules")
+    public ResponseEntity<?> generateGymClassSchedule (@PathVariable Long id, @RequestBody List<ScheduleData> schedules) {
+        schedules.forEach(e -> {
+            System.out.println(e.getEndTime());
+        });
+        return null;
     }
 
 }

@@ -2,15 +2,8 @@ package com.kurt.gym.schedule.model;
 
 import lombok.NoArgsConstructor;
 
-import java.sql.Time;
 import java.util.Date;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.kurt.gym.helper.SqlTimeDeserializer;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,23 +23,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class Schedule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private short day;
+    private Date startTime;
 
-    @JsonFormat(pattern = "hh:mm:ss")
-    @JsonDeserialize(using = SqlTimeDeserializer.class)
-    private Time startTime;
-
-    @JsonFormat(pattern = "hh:mm:ss")
-    @JsonDeserialize(using = SqlTimeDeserializer.class)
-    private Time endTime;
-
-    @CreationTimestamp
-    private Date createdAt;
-
-    @UpdateTimestamp
-    private Date updatedAt;
+    private Date endTime;
 }
