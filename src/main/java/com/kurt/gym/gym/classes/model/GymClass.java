@@ -1,8 +1,7 @@
 package com.kurt.gym.gym.classes.model;
 
 import java.util.Date;
-import java.util.Set;
-
+import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,7 +10,6 @@ import com.kurt.gym.schedule.model.Schedule;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
@@ -47,10 +45,10 @@ public class GymClass {
     private Boolean allowedNonMembers;
     private Boolean isActive;
 
-   
     
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Schedule> schedules;
+    
+    @OneToMany(mappedBy = "gymClass",cascade = CascadeType.ALL)
+    private List<Schedule> schedules;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinTable(name = "instructor")
@@ -77,7 +75,7 @@ public class GymClass {
         .build();
     }
     // please dont' change this constructor using for gym repositories
-    public GymClass(long id, String name, String type, Set<Schedule> schedules){
+    public GymClass(long id, String name, String type, List<Schedule> schedules){
         this.id = id;
         this.name = name;
         this.type = type;

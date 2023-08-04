@@ -1,12 +1,10 @@
 package com.kurt.gym.gym.classes.service.GymClass;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -26,7 +24,9 @@ import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserReposit
 import com.kurt.gym.helper.service.ApiMessage;
 import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;
+import com.kurt.gym.schedule.service.ScheduleRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -36,10 +36,29 @@ public class GymClassServiceImpl implements GymClassService {
     private final GymClassRepository gymClassRepository;
     private final GymClassWithUserRepositoy gymClassWithUserRepositoy;
     private final CustomerRepository customerRepository;
+    private final ScheduleRepository scheduleRepository;
 
     @Override
     @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
     public ResponseEntity<GymClass> save(GymClass t) {
+
+        Calendar dateStart = Calendar.getInstance();
+
+        boolean isGymClassActive = true;
+
+        if (t.getDateStart() != null) {
+            dateStart.setTime(t.getDateStart());
+            isGymClassActive = false;
+        }
+
+        Calendar dateEnd = Calendar.getInstance();
+
+        if (t.getDateEnd() != null) {
+            dateEnd.setTime(t.getDateEnd());
+            isGymClassActive = false;
+        }
+
+        t.setIsActive(isGymClassActive);
         gymClassRepository.save(t);
         return new ResponseEntity<GymClass>(
                 t,
@@ -175,13 +194,27 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> generateGymClassSchedule(long gymClassId, List<ScheduleData> scheduleDatas) {
 
-        GymClass currentGymClass = gymClassRepository.getReferenceById(gymClassId);
+        GymClass currentGymClass = gymClassRepository.findById(gymClassId).orElse(null);
 
         if (currentGymClass == null) {
             return ApiMessage.errorResponse("No Gym Class Found");
         }
+
+        // Looping the scheudle data so that we can assure the arrange ment of scheyudle
+        // with day
+
+        HashMap<Short, ScheduleData> scheduleMap = new HashMap<>();
+
+        for (ScheduleData scheduleData : scheduleDatas) {
+            scheduleMap.put(scheduleData.getDay(), scheduleData);
+        }
+
+        System.out.println(scheduleMap.toString());
+
+        List<Schedule> newSchedules = new ArrayList<>();
 
         Calendar dateStart = Calendar.getInstance();
         dateStart.setTime(currentGymClass.getDateStart());
@@ -189,41 +222,59 @@ public class GymClassServiceImpl implements GymClassService {
         Calendar dateEnd = Calendar.getInstance();
         dateEnd.setTime(currentGymClass.getDateEnd());
 
-        // Looping the scheudle data so that we can assure the arrange ment of scheyudle
-        // with day
-        Collections.sort(scheduleDatas);
+        dateEnd.add(Calendar.DAY_OF_WEEK, 1);
 
-        Set<Schedule> schedules = new HashSet<>();
+        currentGymClass.getSchedules().forEach(e -> {
+            System.out.println("delete -->> " + e.getId());
+            this.scheduleRepository.deleteScheduleById(e.getId());
+        });
 
         while (dateStart.before(dateEnd)) {
 
-            int currentDay = dateStart.get(Calendar.DAY_OF_WEEK) - 1;
+            System.err.println("i am here");
 
-            Date startDateWithTime = scheduleDatas.get(currentDay).getStartTime();
-            Date endDateWithTime = scheduleDatas.get(currentDay).getEndTime();
+            int currentDay = dateStart.get(Calendar.DAY_OF_WEEK);
+
+            // in js the Sunday the inedex is zero so we minus 1
+            short possibleDaySched = (short) (currentDay - 1);
+
+            ScheduleData scheduleData = scheduleMap.get(possibleDaySched);
+
+            if (scheduleData == null) {
+                System.out.println("i hjave null " + dateStart.getTime());
+                dateStart.add(Calendar.DAY_OF_WEEK, 1);
+                continue;
+            }
+
+            Date startDateWithTime = scheduleData.getStartTime();
+            Date endDateWithTime = scheduleData.getEndTime();
 
             Calendar startDateWithTimeCalendar = Calendar.getInstance();
             startDateWithTimeCalendar.setTime(startDateWithTime);
-            startDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR), dateStart.get(Calendar.MONTH),
+            startDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR),
+                    dateStart.get(Calendar.MONTH),
                     dateStart.get(Calendar.DAY_OF_MONTH));
 
             Calendar endDateWithTimeCalendar = Calendar.getInstance();
             endDateWithTimeCalendar.setTime(endDateWithTime);
-            endDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR), dateStart.get(Calendar.MONTH),
+            endDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR),
+                    dateStart.get(Calendar.MONTH),
                     dateStart.get(Calendar.DAY_OF_MONTH));
 
             Schedule schedule = Schedule
                     .builder()
                     .endTime(endDateWithTimeCalendar.getTime())
                     .startTime(startDateWithTimeCalendar.getTime())
+                    .gymClass(currentGymClass)
                     .build();
 
-            schedules.add(schedule);
+            newSchedules.add(schedule);
+            scheduleRepository.save(schedule);
 
+            dateStart.add(Calendar.DAY_OF_WEEK, 1);
         }
 
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateGymClassSchedule'");
+        return ApiMessage.successResponse("Generated schedule success");
     }
 
 }

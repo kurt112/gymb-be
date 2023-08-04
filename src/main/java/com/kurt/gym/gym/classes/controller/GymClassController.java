@@ -16,7 +16,6 @@ import com.kurt.gym.gym.classes.model.GymClass;
 import com.kurt.gym.gym.classes.service.GymClass.GymClassService;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
-import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,6 @@ public class GymClassController {
 
     @PostMapping
     public ResponseEntity<?> addGymClass(@RequestBody GymClass gymClass) {
-        System.out.println(gymClass.getSchedules().size());
         return gymClassService.save(gymClass);
     }
 
@@ -87,9 +85,9 @@ public class GymClassController {
     @PostMapping("/{id}/generate-schedules")
     public ResponseEntity<?> generateGymClassSchedule (@PathVariable Long id, @RequestBody List<ScheduleData> schedules) {
         schedules.forEach(e -> {
-            System.out.println(e.getEndTime());
+            System.out.println(e.getDay() + " -> " + e.getStartTime()  );
         });
-        return null;
+        return gymClassService.generateGymClassSchedule(id,schedules);
     }
 
 }
