@@ -2,7 +2,6 @@ package com.kurt.gym.gym.classes.service.GymClass;
 
 import org.springframework.data.domain.Pageable;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;

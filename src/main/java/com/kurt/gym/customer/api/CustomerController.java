@@ -79,12 +79,11 @@ public class CustomerController {
             @PathVariable long userId, @RequestParam(value = "amount") double amount) {
         // TODO: process POST request
 
-        return customerService.topUpCustomer(assignUserToken,userId,amount);
+        return customerService.topUpCustomer(assignUserToken, userId, amount);
     }
 
     @GetMapping("/get-user-id/{rfId}")
     public ResponseEntity<?> getUserIdByRfId(@PathVariable String rfId) {
-
 
         return customerService.getUserIdByCustomerRfId(rfId);
     }

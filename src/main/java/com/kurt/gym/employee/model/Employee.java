@@ -55,6 +55,7 @@ public class Employee {
         .build();
     }
 
+    // FOr employee table creation
     public Employee(long id, User user) {
         this.id = id;
         this.user = user;

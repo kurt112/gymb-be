@@ -58,4 +58,10 @@ public class EmployeeController {
     public ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
         return employeeService.deleteById(id);
     }
+
+    // Last Name first then first name 
+    @GetMapping("/autocomplete")
+    public ResponseEntity<?> searchEmployeeByName(@RequestParam("search") String search) {	
+        return employeeService.getEmployeeCoachAutoComplete(search);
+    }
 }

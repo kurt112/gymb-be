@@ -1,7 +1,9 @@
 package com.kurt.gym.employee.services;
 
 import java.util.HashMap;
+import java.util.List;
 
+import org.hibernate.sql.results.LoadingLogger_.logger;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kurt.gym.employee.model.Employee;
+import com.kurt.gym.helper.model.AutoComplete;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
@@ -48,7 +51,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
         Employee dbEmp = employeeRepository.findById(id).orElse(null);
         if (dbEmp != null)
-        return ApiMessage.errorResponse("Employees not found");
+            return ApiMessage.errorResponse("Employees not found");
 
         employeeRepository.deleteById(id);
         return ApiMessage.successResponse("Employee deleted successfully");
@@ -57,8 +60,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public ResponseEntity<Page<Employee>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(search,pageable);
-      
+        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(search, pageable);
+
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
@@ -66,8 +69,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Cacheable(cacheNames = "employee", key = "#id")
     public ResponseEntity<?> findOne(Long id) {
         Employee employeeFromDb = employeeRepository.findById(id).orElse(null);
-        
-        if(employeeFromDb == null)  return ApiMessage.errorResponse("Employee not found");
+
+        if (employeeFromDb == null)
+            return ApiMessage.errorResponse("Employee not found");
 
         return new ResponseEntity<Employee>(
                 Employee.buildEmployeeFromReference(employeeFromDb),
@@ -76,6 +80,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee referencedById(Long id) {
-    return employeeRepository.getReferenceById(id);
+        return employeeRepository.getReferenceById(id);
+    }
+
+    @Override
+    public ResponseEntity<?> getEmployeeCoachAutoComplete(String search) {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<AutoComplete> employees = employeeRepository.findEmployeeCoachBySearch(search, pageable);
+
+        System.out.println(employees.getContent());
+
+        return new ResponseEntity<List<AutoComplete>>(employees.getContent(), HttpStatus.OK);
     }
 }

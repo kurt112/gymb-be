@@ -15,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,7 +75,7 @@ public class User {
     @UpdateTimestamp
     private Date updatedAt;
 
-    // for customer and employee table
+    // for customer table
     // do not change the order!!!!
     public User (String firstName, String lastName, Date birthDate, String sex, String cellphone, String email){
         this.firstName = firstName;
@@ -85,6 +86,19 @@ public class User {
         this.email = email;
     }
 
+      // for  employee table
+    // do not change the order!!!!
+    public User (String firstName, String lastName, Date birthDate, String sex, String cellphone, String email, String role){
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.sex = sex;
+        this.cellphone = cellphone;
+        this.email = email;
+        this.role = role;
+    }
+
+
     // for customer attendance table
     // do not change the order!!!!
     public User(String firstName, String lastName, BigDecimal pointsAmount, BigDecimal cardValue){
@@ -93,4 +107,11 @@ public class User {
         this.pointsAmount = pointsAmount;
         this.cardValue = cardValue;
     }
+
+    @PrePersist
+    public void prePersist() {
+       this.role = role.toLowerCase();
+    }
+
+
 }

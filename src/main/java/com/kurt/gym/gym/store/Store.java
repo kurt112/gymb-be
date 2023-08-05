@@ -2,18 +2,16 @@ package com.kurt.gym.gym.store;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Set;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.kurt.gym.schedule.model.Schedule;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,21 +28,20 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Store {
 
-    @Id
+    @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
+    private String email;
+
     @JoinColumn(name = "parent_store")
     @OneToOne
+    @JsonIgnore
     private Store parent;
 
     private BigDecimal amountNeedToEarnOnePoint;
-
-    
-    @OneToMany
-    private Set<Schedule> schedules;
 
     @CreationTimestamp
     private Date createdAt;

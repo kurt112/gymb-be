@@ -21,4 +21,6 @@ public interface GymClassService extends BaseService<GymClass> {
     ResponseEntity<?> getGymClasses();
 
     ResponseEntity<?> generateGymClassSchedule(long gymClassId, List<ScheduleData> scheduleDatas);
+
+    ResponseEntity<?> getGymClassSchedule(long gymClassId);
 }

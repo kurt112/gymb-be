@@ -78,16 +78,19 @@ public class GymClassController {
     }
 
     @GetMapping("/schedules")
-      public ResponseEntity<?> gymClassSchedule() {
-       return gymClassService.getGymClasses();
+    public ResponseEntity<?> gymClassSchedule() {
+        return gymClassService.getGymClasses();
+    }
+
+    @GetMapping("/{id}/schedules")
+    public ResponseEntity<?> getGymClassMembers(@PathVariable long id) {
+        return gymClassService.getGymClassSchedule(id);
     }
 
     @PostMapping("/{id}/generate-schedules")
-    public ResponseEntity<?> generateGymClassSchedule (@PathVariable Long id, @RequestBody List<ScheduleData> schedules) {
-        schedules.forEach(e -> {
-            System.out.println(e.getDay() + " -> " + e.getStartTime()  );
-        });
-        return gymClassService.generateGymClassSchedule(id,schedules);
+    public ResponseEntity<?> generateGymClassSchedule(@PathVariable Long id,
+            @RequestBody List<ScheduleData> schedules) {
+        return gymClassService.generateGymClassSchedule(id, schedules);
     }
 
 }

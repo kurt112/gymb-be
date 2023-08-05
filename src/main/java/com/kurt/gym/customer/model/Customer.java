@@ -106,7 +106,7 @@ public class Customer {
         }
     }
     
-    // for customer and employee table
+    // for customer table
     public Customer (long id, User user) {
         this.id = id;
         this.user = user;

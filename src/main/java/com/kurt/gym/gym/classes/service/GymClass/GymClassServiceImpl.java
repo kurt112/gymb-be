@@ -79,6 +79,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @CacheEvict(cacheNames = { "gymClass" }, key = "#id")
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
+        
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
 
         if (gymClass == null)
@@ -212,8 +213,6 @@ public class GymClassServiceImpl implements GymClassService {
             scheduleMap.put(scheduleData.getDay(), scheduleData);
         }
 
-        System.out.println(scheduleMap.toString());
-
         List<Schedule> newSchedules = new ArrayList<>();
 
         Calendar dateStart = Calendar.getInstance();
@@ -225,7 +224,6 @@ public class GymClassServiceImpl implements GymClassService {
         dateEnd.add(Calendar.DAY_OF_WEEK, 1);
 
         currentGymClass.getSchedules().forEach(e -> {
-            System.out.println("delete -->> " + e.getId());
             this.scheduleRepository.deleteScheduleById(e.getId());
         });
 
@@ -241,7 +239,6 @@ public class GymClassServiceImpl implements GymClassService {
             ScheduleData scheduleData = scheduleMap.get(possibleDaySched);
 
             if (scheduleData == null) {
-                System.out.println("i hjave null " + dateStart.getTime());
                 dateStart.add(Calendar.DAY_OF_WEEK, 1);
                 continue;
             }
@@ -274,7 +271,14 @@ public class GymClassServiceImpl implements GymClassService {
             dateStart.add(Calendar.DAY_OF_WEEK, 1);
         }
 
-        return ApiMessage.successResponse("Generated schedule success");
+        return  ApiMessage.successResponse("Generated schedule success");
+    }
+
+    @Override
+    public ResponseEntity<?> getGymClassSchedule(long gymClassId) {
+        List<Schedule> list = scheduleRepository.getGymClassSchedules(gymClassId);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
 }
