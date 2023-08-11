@@ -3,7 +3,6 @@ package com.kurt.gym.employee.services;
 import java.util.HashMap;
 import java.util.List;
 
-import org.hibernate.sql.results.LoadingLogger_.logger;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;

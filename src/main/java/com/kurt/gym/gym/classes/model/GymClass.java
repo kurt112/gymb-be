@@ -14,7 +14,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -45,46 +47,43 @@ public class GymClass {
     private Boolean allowedNonMembers;
     private Boolean isActive;
 
-    
-    
-    @OneToMany(mappedBy = "gymClass",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "gymClass", cascade = CascadeType.ALL)
     private List<Schedule> schedules;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinTable(name = "instructor")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "instructor")
     private Employee instructor;
 
     @CreationTimestamp
     private Date createdAt;
-    
+
     @UpdateTimestamp
     private Date updatedAt;
 
-    
-
-    public static GymClass buildGymClassFromReference(GymClass gymClass){
+    public static GymClass buildGymClassFromReference(GymClass gymClass) {
         return GymClass.builder()
-        .id(gymClass.getId())
-        .dateStart(gymClass.getDateStart())
-        .dateEnd(gymClass.getDateEnd())
-        .type(gymClass.getType())
-        .name(gymClass.getName())
-        .createdAt(gymClass.getCreatedAt())
-        .updatedAt(gymClass.getUpdatedAt())
-        .schedules(gymClass.getSchedules())
-        .build();
+                .id(gymClass.getId())
+                .dateStart(gymClass.getDateStart())
+                .dateEnd(gymClass.getDateEnd())
+                .type(gymClass.getType())
+                .name(gymClass.getName())
+                .createdAt(gymClass.getCreatedAt())
+                .updatedAt(gymClass.getUpdatedAt())
+                .schedules(gymClass.getSchedules())
+                .build();
     }
+
     // please dont' change this constructor using for gym repositories
-    public GymClass(long id, String name, String type, List<Schedule> schedules){
+    public GymClass(long id, String name, String type, List<Schedule> schedules) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.schedules = schedules;
     }
 
-
-     // this is for custom fetching in table if you want to fetch another create another constructor method
-    public GymClass(Long id, String name, String type, Date dateStart, Date dateEnd){
+    // this is for custom fetching in table if you want to fetch another create
+    // another constructor method
+    public GymClass(Long id, String name, String type, Date dateStart, Date dateEnd) {
         this.id = id;
         this.name = name;
         this.type = type;

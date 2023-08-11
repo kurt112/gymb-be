@@ -90,7 +90,13 @@ public class GymClassController {
     @PostMapping("/{id}/generate-schedules")
     public ResponseEntity<?> generateGymClassSchedule(@PathVariable Long id,
             @RequestBody List<ScheduleData> schedules) {
-        return gymClassService.generateGymClassSchedule(id, schedules);
+    return gymClassService.generateGymClassSchedule(id, schedules);
+    }
+
+    @PostMapping("/{gymClassId}/assign-instructor/{instructorId}")
+    public ResponseEntity<?> assignInstructor (@PathVariable("gymClassId") Long gymClassId, @PathVariable("instructorId") Long instrutorId){
+
+        return gymClassService.assignGymClassInstructor(gymClassId, instrutorId);
     }
 
 }

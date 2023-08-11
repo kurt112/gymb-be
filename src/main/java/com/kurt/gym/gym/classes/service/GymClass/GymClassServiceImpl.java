@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import com.kurt.gym.customer.model.Customer;
 import com.kurt.gym.customer.services.CustomerRepository;
+import com.kurt.gym.employee.model.Employee;
+import com.kurt.gym.employee.services.EmployeeRepository;
 import com.kurt.gym.gym.classes.model.GymClass;
 import com.kurt.gym.gym.classes.model.GymClassWithUser;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserRepositoy;
@@ -37,6 +39,7 @@ public class GymClassServiceImpl implements GymClassService {
     private final GymClassWithUserRepositoy gymClassWithUserRepositoy;
     private final CustomerRepository customerRepository;
     private final ScheduleRepository scheduleRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
@@ -280,5 +283,24 @@ public class GymClassServiceImpl implements GymClassService {
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<?> assignGymClassInstructor(long gymClassId, long instructorId) {
+
+        GymClass gymClass = this.gymClassRepository.getReferenceById(gymClassId);
+
+        if(gymClass == null) return ApiMessage.errorResponse("Can't find gym class with id of " + gymClassId);
+
+        Employee employee = this.employeeRepository.getReferenceById(instructorId);
+
+        if(employee == null) return ApiMessage.errorResponse("Can't find employee with id of " + instructorId);
+
+        gymClass.setInstructor(employee);
+
+        this.gymClassRepository.save(gymClass);
+
+        return ApiMessage.successResponse("Assigne insturctor success");
+    }
+
 
 }

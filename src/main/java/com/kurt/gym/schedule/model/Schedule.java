@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.gym.classes.model.GymClass;
 
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreRemove;
 import lombok.AllArgsConstructor;
@@ -35,6 +37,11 @@ public class Schedule {
     private Date startTime;
 
     private Date endTime;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "instructor")
+    private Employee employee;
 
     @JsonIgnore
     @ManyToOne
