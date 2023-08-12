@@ -15,10 +15,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +37,6 @@ public class GymClass {
     private Long id;
 
     private String name;
-    private String type;
     private double price;
     private Date dateStart;
     private Date dateEnd;
@@ -54,18 +51,24 @@ public class GymClass {
     @JoinColumn(name = "instructor")
     private Employee instructor;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "gymClassType")
+    private GymClassType gymClassType;
+
     @CreationTimestamp
     private Date createdAt;
 
     @UpdateTimestamp
     private Date updatedAt;
 
+    // this data is not important for optimization purposes
+    private String instructorName;
+
     public static GymClass buildGymClassFromReference(GymClass gymClass) {
         return GymClass.builder()
                 .id(gymClass.getId())
                 .dateStart(gymClass.getDateStart())
                 .dateEnd(gymClass.getDateEnd())
-                .type(gymClass.getType())
                 .name(gymClass.getName())
                 .createdAt(gymClass.getCreatedAt())
                 .updatedAt(gymClass.getUpdatedAt())
@@ -74,20 +77,21 @@ public class GymClass {
     }
 
     // please dont' change this constructor using for gym repositories
-    public GymClass(long id, String name, String type, List<Schedule> schedules) {
+    public GymClass(long id, String name, GymClassType gymClassType, List<Schedule> schedules) {
         this.id = id;
         this.name = name;
-        this.type = type;
+        this.gymClassType = gymClassType;
         this.schedules = schedules;
     }
 
     // this is for custom fetching in table if you want to fetch another create
     // another constructor method
-    public GymClass(Long id, String name, String type, Date dateStart, Date dateEnd) {
+    public GymClass(Long id, String name, GymClassType gymClassType, Date dateStart, Date dateEnd, String instructorName) {
         this.id = id;
         this.name = name;
-        this.type = type;
+        this.gymClassType = gymClassType;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
+        this.instructorName = instructorName;
     }
 }

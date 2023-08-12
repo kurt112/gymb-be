@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kurt.gym.gym.classes.model.GymClass;
+import com.kurt.gym.gym.classes.model.GymClassType;
 import com.kurt.gym.helper.service.BaseService;
 import com.kurt.gym.schedule.model.ScheduleData;
 
@@ -25,4 +26,13 @@ public interface GymClassService extends BaseService<GymClass> {
     ResponseEntity<?> getGymClassSchedule(long gymClassId);
 
     ResponseEntity<?> assignGymClassInstructor(long gymClassId, long instructorId);
+
+    ResponseEntity<?> saveGymClassType(GymClassType gymClassType);
+
+    ResponseEntity<?> getGymClassType(Long id);
+
+    ResponseEntity<?> getGymClassTypes();
+
+    ResponseEntity<?> deleteGymClassType(Long id);
+
 }

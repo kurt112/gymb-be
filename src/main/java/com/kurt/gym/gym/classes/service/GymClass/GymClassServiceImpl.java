@@ -12,15 +12,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.customer.model.Customer;
 import com.kurt.gym.customer.services.CustomerRepository;
 import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.employee.services.EmployeeRepository;
 import com.kurt.gym.gym.classes.model.GymClass;
+import com.kurt.gym.gym.classes.model.GymClassType;
 import com.kurt.gym.gym.classes.model.GymClassWithUser;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserRepositoy;
 import com.kurt.gym.helper.service.ApiMessage;
@@ -33,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class GymClassServiceImpl implements GymClassService {
 
     private final GymClassRepository gymClassRepository;
@@ -40,12 +44,18 @@ public class GymClassServiceImpl implements GymClassService {
     private final CustomerRepository customerRepository;
     private final ScheduleRepository scheduleRepository;
     private final EmployeeRepository employeeRepository;
+    private final GymClassTypeRepository gymClassTypeRepository;
 
+    @Transactional
     @Override
-    @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
+    // @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
     public ResponseEntity<GymClass> save(GymClass t) {
 
         Calendar dateStart = Calendar.getInstance();
+
+        GymClassType gymClassType = t.getGymClassType();
+
+        t.setGymClassType(null);
 
         boolean isGymClassActive = true;
 
@@ -62,6 +72,9 @@ public class GymClassServiceImpl implements GymClassService {
         }
 
         t.setIsActive(isGymClassActive);
+        gymClassRepository.save(t);
+
+        t.setGymClassType(gymClassType);
         gymClassRepository.save(t);
         return new ResponseEntity<GymClass>(
                 t,
@@ -82,7 +95,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @CacheEvict(cacheNames = { "gymClass" }, key = "#id")
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
-        
+
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
 
         if (gymClass == null)
@@ -94,7 +107,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     public ResponseEntity<Page<GymClass>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GymClass> classes = gymClassRepository.findAll(pageable);
+        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(pageable);
 
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }
@@ -232,8 +245,6 @@ public class GymClassServiceImpl implements GymClassService {
 
         while (dateStart.before(dateEnd)) {
 
-            System.err.println("i am here");
-
             int currentDay = dateStart.get(Calendar.DAY_OF_WEEK);
 
             // in js the Sunday the inedex is zero so we minus 1
@@ -274,7 +285,7 @@ public class GymClassServiceImpl implements GymClassService {
             dateStart.add(Calendar.DAY_OF_WEEK, 1);
         }
 
-        return  ApiMessage.successResponse("Generated schedule success");
+        return ApiMessage.successResponse("Generated schedule success");
     }
 
     @Override
@@ -289,18 +300,65 @@ public class GymClassServiceImpl implements GymClassService {
 
         GymClass gymClass = this.gymClassRepository.getReferenceById(gymClassId);
 
-        if(gymClass == null) return ApiMessage.errorResponse("Can't find gym class with id of " + gymClassId);
+        if (gymClass == null)
+            return ApiMessage.errorResponse("Can't find gym class with id of " + gymClassId);
 
         Employee employee = this.employeeRepository.getReferenceById(instructorId);
 
-        if(employee == null) return ApiMessage.errorResponse("Can't find employee with id of " + instructorId);
+        if (employee == null)
+            return ApiMessage.errorResponse("Can't find employee with id of " + instructorId);
+
+        User user = employee.getUser();
+
+        String instructorName = user.getLastName() + ", " + user.getFirstName();
 
         gymClass.setInstructor(employee);
+        gymClass.setInstructorName(instructorName);
 
         this.gymClassRepository.save(gymClass);
 
         return ApiMessage.successResponse("Assigne insturctor success");
     }
 
+    @Override
+    public ResponseEntity<?> saveGymClassType(GymClassType gymClassType) {
+
+        gymClassTypeRepository.save(gymClassType);
+
+        return new ResponseEntity<GymClassType>(
+                gymClassType,
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> getGymClassType(Long id) {
+
+        GymClassType gymClassType = gymClassTypeRepository.findById(id).orElse(null);
+
+        if (gymClassType == null)
+            return ApiMessage.errorResponse("No Gym Class Type found with id " + id);
+
+        return new ResponseEntity<GymClassType>(
+                gymClassType,
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> getGymClassTypes() {
+        List<GymClassType> gymClassTypes = gymClassTypeRepository.findAll();
+
+        return new ResponseEntity<List<GymClassType>>(
+                gymClassTypes,
+                HttpStatus.OK);
+    }
+
+    @Override
+    @Modifying
+    public ResponseEntity<?> deleteGymClassType(Long id) {
+        System.out.println(id);
+        gymClassTypeRepository.deleteById(id);
+
+        return ApiMessage.successResponse("Gym class type deleted successfully");
+    }
 
 }

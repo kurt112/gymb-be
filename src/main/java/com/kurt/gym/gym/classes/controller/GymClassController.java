@@ -3,6 +3,7 @@ package com.kurt.gym.gym.classes.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kurt.gym.gym.classes.model.GymClass;
+import com.kurt.gym.gym.classes.model.GymClassType;
 import com.kurt.gym.gym.classes.service.GymClass.GymClassService;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
@@ -90,13 +92,37 @@ public class GymClassController {
     @PostMapping("/{id}/generate-schedules")
     public ResponseEntity<?> generateGymClassSchedule(@PathVariable Long id,
             @RequestBody List<ScheduleData> schedules) {
-    return gymClassService.generateGymClassSchedule(id, schedules);
+        return gymClassService.generateGymClassSchedule(id, schedules);
     }
 
     @PostMapping("/{gymClassId}/assign-instructor/{instructorId}")
-    public ResponseEntity<?> assignInstructor (@PathVariable("gymClassId") Long gymClassId, @PathVariable("instructorId") Long instrutorId){
+    public ResponseEntity<?> assignInstructor(@PathVariable("gymClassId") Long gymClassId,
+            @PathVariable("instructorId") Long instrutorId) {
 
         return gymClassService.assignGymClassInstructor(gymClassId, instrutorId);
     }
 
+    @PostMapping("/type")
+    public ResponseEntity<?> createGymClassType(@RequestBody GymClassType gymClassType) {
+
+        return gymClassService.saveGymClassType(gymClassType);
+    }
+
+    @GetMapping("/types")
+    public ResponseEntity<?> createGymClassType() {
+
+        return gymClassService.getGymClassTypes();
+    }
+
+    @GetMapping("/types/{id}")
+    public ResponseEntity<?> createGymClassType(@PathVariable("id") Long id) {
+
+        return gymClassService.getGymClassType(id);
+    }
+
+    @DeleteMapping("/type")
+    public ResponseEntity<?> deleteGymClassType(@RequestParam("id") Long id) {
+
+        return gymClassService.deleteGymClassType(id);
+    }
 }
