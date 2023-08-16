@@ -9,6 +9,7 @@ import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.schedule.model.Schedule;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,6 +59,7 @@ public class GymClass {
     private GymClassType gymClassType;
 
     @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private Date createdAt;
 
     @UpdateTimestamp
@@ -86,7 +90,8 @@ public class GymClass {
 
     // this is for custom fetching in table if you want to fetch another create
     // another constructor method
-    public GymClass(Long id, String name, GymClassType gymClassType, Date dateStart, Date dateEnd, String instructorName) {
+    public GymClass(Long id, String name, GymClassType gymClassType, Date dateStart, Date dateEnd,
+            String instructorName) {
         this.id = id;
         this.name = name;
         this.gymClassType = gymClassType;
@@ -94,4 +99,10 @@ public class GymClass {
         this.dateEnd = dateEnd;
         this.instructorName = instructorName;
     }
+
+    @PrePersist
+    public void prePersist() {
+        setInstructorName(this.instructor.getUser().getLastName() + ", " + this.instructor.getUser().getFirstName());
+    }
+
 }

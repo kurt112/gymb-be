@@ -12,6 +12,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Table
 @Entity
@@ -28,6 +31,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 public class Schedule {
 
     @Id
@@ -41,7 +45,7 @@ public class Schedule {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "instructor")
-    private Employee employee;
+    private Employee instructor;
 
     @JsonIgnore
     @ManyToOne

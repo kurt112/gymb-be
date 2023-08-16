@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.kurt.gym.gym.classes.model.GymClass;
 import com.kurt.gym.gym.classes.model.GymClassType;
 import com.kurt.gym.helper.service.BaseService;
+import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;
 
 @Service
@@ -35,4 +36,7 @@ public interface GymClassService extends BaseService<GymClass> {
 
     ResponseEntity<?> deleteGymClassType(Long id);
 
+    ResponseEntity<?> deleteGymClassSchedule(Long gymClassId, Long scheduleId);
+
+    ResponseEntity<?> saveGymClassSchedule(Long gynClassId, Schedule schedule);
 }

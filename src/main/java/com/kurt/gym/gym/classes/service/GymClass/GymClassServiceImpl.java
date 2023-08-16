@@ -54,8 +54,8 @@ public class GymClassServiceImpl implements GymClassService {
         Calendar dateStart = Calendar.getInstance();
 
         GymClassType gymClassType = t.getGymClassType();
-
-        t.setGymClassType(null);
+        
+        System.out.println(gymClassType.getName());
 
         boolean isGymClassActive = true;
 
@@ -277,6 +277,7 @@ public class GymClassServiceImpl implements GymClassService {
                     .endTime(endDateWithTimeCalendar.getTime())
                     .startTime(startDateWithTimeCalendar.getTime())
                     .gymClass(currentGymClass)
+                    .instructor(currentGymClass.getInstructor())
                     .build();
 
             newSchedules.add(schedule);
@@ -355,10 +356,44 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @Modifying
     public ResponseEntity<?> deleteGymClassType(Long id) {
-        System.out.println(id);
         gymClassTypeRepository.deleteById(id);
 
         return ApiMessage.successResponse("Gym class type deleted successfully");
+    }
+
+    @Override
+    public ResponseEntity<?> deleteGymClassSchedule(Long gymClassId, Long scheduleId) {
+        Schedule schedule = scheduleRepository.getReferenceById(scheduleId);
+
+        if (schedule == null)
+            return ApiMessage.errorResponse("Schedule not found");
+
+        if (schedule.getGymClass().getId() != gymClassId)
+            return ApiMessage.errorResponse("Schedule does not exsit in current gym class");
+
+        scheduleRepository.deleteScheduleById(scheduleId);
+
+        return ApiMessage.successResponse("Schedule deleted successfully");
+    }
+
+    @Override
+    public ResponseEntity<?> saveGymClassSchedule(Long gymClassId, Schedule schedule) {
+
+        GymClass gymClass = gymClassRepository.getReferenceById(gymClassId);
+
+        Schedule existingSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+
+        if (existingSchedule == null || existingSchedule.getGymClass().getId() != gymClass.getId()) {
+            return ApiMessage.errorResponse("Schedule does not exsit in current gym class");
+        }
+
+        if (schedule != null) {
+            existingSchedule.setStartTime(schedule.getStartTime());
+            existingSchedule.setEndTime(schedule.getEndTime());
+            scheduleRepository.saveAndFlush(existingSchedule);
+        }
+
+        return ApiMessage.successResponse("Schedule saved successfully");
     }
 
 }

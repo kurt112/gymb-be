@@ -70,6 +70,7 @@ public class User {
         
 
     @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private Date createdAt;
     
     @UpdateTimestamp

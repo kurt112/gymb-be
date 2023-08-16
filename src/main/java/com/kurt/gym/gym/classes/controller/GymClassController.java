@@ -18,6 +18,7 @@ import com.kurt.gym.gym.classes.model.GymClassType;
 import com.kurt.gym.gym.classes.service.GymClass.GymClassService;
 import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
+import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;
 
 import lombok.RequiredArgsConstructor;
@@ -85,8 +86,20 @@ public class GymClassController {
     }
 
     @GetMapping("/{id}/schedules")
-    public ResponseEntity<?> getGymClassMembers(@PathVariable long id) {
+    public ResponseEntity<?> getGymClassSchedule(@PathVariable long id) {
         return gymClassService.getGymClassSchedule(id);
+    }
+
+    @PostMapping("/{gymClassId}/schedules")
+    public ResponseEntity<?> addGymClassSchedule(@PathVariable("gymClassId") Long id, @RequestBody Schedule schedule) {
+        System.out.println(schedule.toString());
+        return gymClassService.saveGymClassSchedule(id,schedule);
+    }
+
+    @DeleteMapping("/{id}/schedules/{schedule-id}")
+    public ResponseEntity<?> deletGymClassSchedule(@PathVariable("id") Long gymClassId,
+            @PathVariable("schedule-id") long scheduleId) {
+        return gymClassService.deleteGymClassSchedule(gymClassId, scheduleId);
     }
 
     @PostMapping("/{id}/generate-schedules")
