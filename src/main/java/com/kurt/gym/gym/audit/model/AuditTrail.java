@@ -49,4 +49,11 @@ public class AuditTrail {
 
     @CreationTimestamp
     private Date createdAt;
+
+    public AuditTrail(Long id, Action action, String message, Date createdAt) {
+        this.id = id;
+        this.action = action;
+        this.message = message;
+        this.createdAt = createdAt;
+    }
 }

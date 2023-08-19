@@ -72,7 +72,7 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public ResponseEntity<?> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Membership> memberships = membershipRepository.findAllByOrderByCreatedAtDesc(pageable);
+        Page<Membership> memberships = membershipRepository.findAllByOrderByCreatedAtDesc(search,pageable);
 
         return new ResponseEntity<>(memberships, HttpStatus.OK);
     }
@@ -169,13 +169,13 @@ public class MembershipServiceImpl implements MembershipService {
 
         Long membershipWithUserId = membershipWithUserRepository.getMembershipWithUserId(customer.getUser().getId());
 
-        if(membershipWithUserId == null){
+        if (membershipWithUserId == null) {
             return ApiMessage.errorResponse("No Current Membership");
         }
 
         MembershipWithUser membershipWithUser = membershipWithUserRepository.getReferenceById(membershipWithUserId);
 
-        if(membershipWithUser == null){
+        if (membershipWithUser == null) {
             return ApiMessage.errorResponse("No Membership With User Found");
         }
 

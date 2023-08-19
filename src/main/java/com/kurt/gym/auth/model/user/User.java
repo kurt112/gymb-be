@@ -6,7 +6,7 @@ import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.kurt.gym.gym.store.Store;
+import com.kurt.gym.gym.store.model.Store;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

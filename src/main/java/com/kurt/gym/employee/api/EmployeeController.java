@@ -28,9 +28,14 @@ public class EmployeeController {
     public ResponseEntity<?> getEmployees(
             @RequestParam("page") int page,
             @RequestParam("size") int size,
-            @RequestParam("search") String search) {
+            @RequestParam("search") String search,
+            @RequestParam(required = false) String role) {
 
-        return employeeService.data(search, size, page - 1);
+                System.out.println("the role " + role);
+        if (role == null)
+            return employeeService.data(search, size, page - 1);
+
+        return employeeService.data(search, role, size, page - 1);
     }
 
     @GetMapping("/{id}")
@@ -59,9 +64,9 @@ public class EmployeeController {
         return employeeService.deleteById(id);
     }
 
-    // Last Name first then first name 
+    // Last Name first then first name
     @GetMapping("/autocomplete")
-    public ResponseEntity<?> searchEmployeeByName(@RequestParam("search") String search) {	
+    public ResponseEntity<?> searchEmployeeByName(@RequestParam("search") String search) {
         return employeeService.getEmployeeCoachAutoComplete(search);
     }
 }

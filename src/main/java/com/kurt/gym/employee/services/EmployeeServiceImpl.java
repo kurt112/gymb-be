@@ -59,7 +59,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public ResponseEntity<Page<Employee>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(search, pageable);
+        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(search,  pageable);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
@@ -90,5 +90,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         System.out.println(employees.getContent());
 
         return new ResponseEntity<List<AutoComplete>>(employees.getContent(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> data(String search, String role, int size, int page) {
+        Pageable pageable = PageRequest.of(page, size);
+        System.out.println("The role " + role);
+        Page<Employee> employees = employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role, pageable);
+
+        return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 }

@@ -20,7 +20,11 @@ import com.kurt.gym.auth.model.services.user.UserRepository;
 import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.customer.model.Customer;
 import com.kurt.gym.customer.model.CustomerAttendance;
-import com.kurt.gym.gym.store.Store;
+import com.kurt.gym.gym.audit.model.AuditTrail;
+import com.kurt.gym.gym.audit.service.AuditTrailService;
+import com.kurt.gym.gym.store.model.Store;
+import com.kurt.gym.gym.store.service.StoreService;
+import com.kurt.gym.helper.Action;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import jakarta.transaction.Transactional;
@@ -33,6 +37,8 @@ public class CustomerImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
+    private final StoreService storeService;
+    private final AuditTrailService auditTrailService;
 
     @Override
     @CachePut(cacheNames = { "customer" }, key = "#t.id")
@@ -75,7 +81,7 @@ public class CustomerImpl implements CustomerService {
     @Override
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Customer> customers = customerRepository.findAllByOrderByCreatedAtDesc(search,pageable);
+        Page<Customer> customers = customerRepository.findAllByOrderByCreatedAtDesc(search, pageable);
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
@@ -177,8 +183,6 @@ public class CustomerImpl implements CustomerService {
     @Override
     public ResponseEntity<?> topUpCustomer(String userTokenAssign, long userId, double amount) {
 
-        // TODO: add the user token to the audittrail
-
         User user = userRepository.getReferenceById(userId);
 
         if (user == null) {
@@ -198,19 +202,37 @@ public class CustomerImpl implements CustomerService {
         user.setPointsAmount(totalPoints);
 
         userRepository.save(user);
+        storeService.insertSale(store, topUpAMount, new Date());
+
+        // TODO: change the .user to the current logind user
+
+        String assignUser = user.getLastName().toUpperCase() + ", " + user.getFirstName();
+        String appliedUser = user.getLastName().toUpperCase() + ", " + user.getFirstName();
+
+        AuditTrail auditTrail = AuditTrail
+                .builder()
+                .message(assignUser + " Top up customer " + appliedUser + " value of " + topUpAMount)
+                .customer(user)
+                .user(user)
+                .action(Action.TOP_UP)
+                .build();
+
+        auditTrailService.save(auditTrail);
+
         return ApiMessage.successResponse("Top up success");
     }
 
     @Override
     public ResponseEntity<?> getUserIdByCustomerRfId(String rfId) {
-        
+
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
 
-        if(customerId == null)  return ApiMessage.errorResponse("Customer not found");
+        if (customerId == null)
+            return ApiMessage.errorResponse("Customer not found");
 
         Customer customer = customerRepository.getReferenceById(customerId);
 
-        return ApiMessage.successResponse(""+customer.getUser().getId());
+        return ApiMessage.successResponse("" + customer.getUser().getId());
     }
 
 }

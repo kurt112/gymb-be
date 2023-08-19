@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 @Table
 @Entity
 @NoArgsConstructor
@@ -64,5 +65,15 @@ public class Membership {
 
     @UpdateTimestamp
     private Date updatedAt;
+
+    public Membership(Long id, String code, String name, double price, Date membershipPromoExpiration, Charges charge, Date createdAt) {
+        this.id = id;
+        this.name = name;
+        this.code = code;
+        this.price = price;
+        this.membershipPromoExpiration = membershipPromoExpiration;
+        this.charge = charge;
+        this.createdAt = createdAt;
+    }
 
 }

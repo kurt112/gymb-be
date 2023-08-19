@@ -17,8 +17,9 @@ public interface GymClassRepository extends JpaRepository<GymClass, Long> {
     @Query("select e.id from GymClass e where e.id = ?1")
     Long isExist(Long id);
 
-    @Query("select new com.kurt.gym.gym.classes.model.GymClass(e.id, e.name, e.gymClassType, e.dateStart, e.dateEnd, e.instructorName) from GymClass e")
-    Page<GymClass> getGymClassWithoutSchedules(Pageable pageable);
+    @Query("select new com.kurt.gym.gym.classes.model.GymClass(e.id, e.name, e.gymClassType, e.dateStart, e.dateEnd, e.instructorName) " +  
+    "from GymClass e where (e.gymClassType.name like %?1% or e.name like %?1% or e.instructorName like %?1%)")
+    Page<GymClass> getGymClassWithoutSchedules(String search,Pageable pageable);
 
     @Query("select e from GymClass e where e.isActive = true")
     List<GymClass> getGymClassesSchedule( );

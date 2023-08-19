@@ -107,7 +107,8 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     public ResponseEntity<Page<GymClass>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(pageable);
+        System.out.println(search);
+        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(search,pageable);
 
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }

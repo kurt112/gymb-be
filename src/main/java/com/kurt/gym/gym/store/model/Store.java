@@ -1,8 +1,11 @@
-package com.kurt.gym.gym.store;
+package com.kurt.gym.gym.store.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,6 +15,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +40,12 @@ public class Store {
     private String name;
 
     private String email;
+
+    private BigDecimal totalSales;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "store")
+    private List<StoreSale> sales;
 
     @JoinColumn(name = "parent_store")
     @OneToOne
