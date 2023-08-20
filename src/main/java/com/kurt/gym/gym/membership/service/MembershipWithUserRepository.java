@@ -12,4 +12,5 @@ public interface MembershipWithUserRepository extends JpaRepository<MembershipWi
     
     @Query("select e.id from MembershipWithUser e where e.currentEnroll.id = ?1 and e.isActive = 1")
     Long getMembershipWithUserId(long userId);
+    
 }

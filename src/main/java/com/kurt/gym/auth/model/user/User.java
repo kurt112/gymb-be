@@ -57,13 +57,14 @@ public class User {
     private Date membershipDateStart;
     private Date membershipDateEnd;
     private Date lastIn;
+    private Date nextCharge;
+    private Date lastCharge;
 
     private BigDecimal pointsAmount;
     private BigDecimal cardValue;
     
     private String role;
-
-
+    
     @ManyToOne
     @JoinColumn(name = "assign_store")
     private Store store;

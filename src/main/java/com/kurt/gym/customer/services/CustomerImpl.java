@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,9 +24,12 @@ import com.kurt.gym.customer.model.Customer;
 import com.kurt.gym.customer.model.CustomerAttendance;
 import com.kurt.gym.gym.audit.model.AuditTrail;
 import com.kurt.gym.gym.audit.service.AuditTrailService;
+import com.kurt.gym.gym.membership.model.MembershipWithUser;
+import com.kurt.gym.gym.membership.service.MembershipWithUserRepository;
 import com.kurt.gym.gym.store.model.Store;
 import com.kurt.gym.gym.store.service.StoreService;
 import com.kurt.gym.helper.Action;
+import com.kurt.gym.helper.Charges;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import jakarta.transaction.Transactional;
@@ -39,6 +44,9 @@ public class CustomerImpl implements CustomerService {
     private final UserRepository userRepository;
     private final StoreService storeService;
     private final AuditTrailService auditTrailService;
+    private final MembershipWithUserRepository membershipWithUserRepository;
+
+    Logger logger = LoggerFactory.getLogger(CustomerImpl.class);
 
     @Override
     @CachePut(cacheNames = { "customer" }, key = "#t.id")
@@ -108,13 +116,27 @@ public class CustomerImpl implements CustomerService {
             return ApiMessage.errorResponse("Customer Not Found");
 
         Customer customer = customerRepository.getReferenceById(customerId);
+        User user = customer.getUser();
 
         Calendar currenDate = Calendar.getInstance();
         currenDate.setTime(new Date());
 
+        if (user.getCardValue().doubleValue() < 0) {
+            customer.setIsMember(false);
+            customerRepository.save(customer);
+
+            logger.info("Please settle balance of " + user.getCardValue().doubleValue()
+                    + " and subscribe to new membership");
+
+            throw new UnsupportedOperationException("Please settle balance of " + user.getCardValue().doubleValue()
+                    + " and subscribe to new membership");
+        }
+
         if (!customer.getIsMember()) {
             throw new UnsupportedOperationException("Customer is not a member");
         }
+
+        deductCustomerSubscription(user);
 
         if (currenDate.getTime().after(customer.getMembershipDuration())) {
             customer.setIsMember(false);
@@ -154,8 +176,6 @@ public class CustomerImpl implements CustomerService {
         customer.setIsOut(!isCustomerIsOut);
 
         String fullName = "";
-
-        User user = customer.getUser();
 
         if (user != null) {
             fullName = user.getFirstName() + " " + user.getLastName();
@@ -233,6 +253,89 @@ public class CustomerImpl implements CustomerService {
         Customer customer = customerRepository.getReferenceById(customerId);
 
         return ApiMessage.successResponse("" + customer.getUser().getId());
+    }
+
+    @Override
+    public void deductCustomerSubscription(User user) {
+
+        Long userId = user.getId();
+
+        Long membershipWithUserId = membershipWithUserRepository.getMembershipWithUserId(userId);
+
+        if (membershipWithUserId == null) {
+            logger.error("Membership with user not found with the id of user  " + userId);
+            return;
+        }
+
+        MembershipWithUser membershipWithUser = membershipWithUserRepository.getReferenceById(membershipWithUserId);
+
+        Charges charges = membershipWithUser.getCharge();
+
+        if (charges == Charges.FREE_TRIAL) {
+            logger.error("No Charges with free trial");
+            return;
+        }
+
+        BigDecimal membershipPrice = new BigDecimal(membershipWithUser.getPrice());
+
+        // if the last charge and next charge is equal null meaning the user is not yet
+        // dedecuted to the membership
+
+        BigDecimal userCurrentCardValue = user.getCardValue();
+        BigDecimal newBalance = userCurrentCardValue.subtract(membershipPrice);
+
+        Calendar nextChargeCalendar = Calendar.getInstance();
+
+        Date currentDate = new Date();
+        logger.info("Current Date -> " + currentDate);
+
+        if (user.getLastCharge() == null && user.getNextCharge() == null) {
+            user.setCardValue(newBalance);
+            nextChargeCalendar.setTime(currentDate);
+        } else {
+
+            nextChargeCalendar.setTime(user.getNextCharge());
+
+            if (nextChargeCalendar.getTime().after(currentDate)) {
+                logger.info("No Charge will be deducted");
+                return;
+            } else if (nextChargeCalendar.getTime().before(currentDate)) {
+                logger.info("Charging Balance");
+                user.setCardValue(newBalance);
+
+                // Getting the user last charge so that when we compute the charges will be
+                // calculated to the last charge
+                nextChargeCalendar.setTime(user.getLastCharge());
+            }
+        }
+
+        switch (charges) {
+            case ANNUALLY:
+                nextChargeCalendar.add(Calendar.YEAR, 1);
+                break;
+            case WEEKLY:
+                nextChargeCalendar.add(Calendar.DAY_OF_MONTH, 7);
+                break;
+            case QUARTERLY:
+                nextChargeCalendar.add(Calendar.MONTH, 3);
+                break;
+            case SEMI_ANNUAL:
+                nextChargeCalendar.add(Calendar.MONTH, 6);
+                break;
+            case MONTHLY:
+                nextChargeCalendar.add(Calendar.MONTH, 1);
+                break;
+            case EVERYDAY:
+                nextChargeCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                break;
+            default:
+                logger.error("No Charges Found for " + MembershipWithUser.class + " -> " + membershipWithUser.getId());
+                break;
+        }
+
+        user.setLastCharge(new Date());
+        user.setNextCharge(nextChargeCalendar.getTime());
+        logger.info("Next Charge Date -> " + nextChargeCalendar.getTime());
     }
 
 }

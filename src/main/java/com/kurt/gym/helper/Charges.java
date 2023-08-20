@@ -12,8 +12,9 @@ public enum Charges {
     MONTHLY(1),
     ANNUALLY(2),
     WEEKLY(3),
-    QUERTERLY(4),
-    SEMI_ANNUAL(5);
+    QUARTERLY(4),
+    SEMI_ANNUAL(5),
+    EVERYDAY(6);
 
     private final int value;
 
