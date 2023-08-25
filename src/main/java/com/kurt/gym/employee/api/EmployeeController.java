@@ -30,8 +30,7 @@ public class EmployeeController {
             @RequestParam("size") int size,
             @RequestParam("search") String search,
             @RequestParam(required = false) String role) {
-
-                System.out.println("the role " + role);
+                
         if (role == null)
             return employeeService.data(search, size, page - 1);
 

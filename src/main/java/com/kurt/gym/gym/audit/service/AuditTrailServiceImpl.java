@@ -1,5 +1,8 @@
 package com.kurt.gym.gym.audit.service;
 
+
+import java.util.Date;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +26,14 @@ public class AuditTrailServiceImpl implements AuditTrailService {
         Pageable pageable = PageRequest.of(page, size);
         Page<AuditTrail> audiTrails = auditTrailRepoisitory.findAuditTrailOrderByCreatedAtDesc(search, pageable);
 
+        return new ResponseEntity<>(audiTrails, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> data(String search, int size, int page, Date startDate, Date endDate) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AuditTrail> audiTrails = auditTrailRepoisitory
+                .findAuditTrailFilterByStartDateAndEndDateOrderByCreatedAtDesc(startDate, endDate, pageable);
         return new ResponseEntity<>(audiTrails, HttpStatus.OK);
     }
 

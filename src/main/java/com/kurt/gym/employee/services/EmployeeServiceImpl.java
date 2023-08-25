@@ -95,7 +95,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public ResponseEntity<?> data(String search, String role, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        System.out.println("The role " + role);
         Page<Employee> employees = employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role, pageable);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
