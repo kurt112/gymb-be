@@ -62,4 +62,9 @@ public class UserServiceImplementation implements UserService{
         return userRepository.getReferenceById(id);
     }
 
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
 }

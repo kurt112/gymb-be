@@ -1,6 +1,6 @@
 package com.kurt.gym.gym.audit.service;
 
-
+import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.data.domain.Page;
@@ -32,8 +32,23 @@ public class AuditTrailServiceImpl implements AuditTrailService {
     @Override
     public ResponseEntity<?> data(String search, int size, int page, Date startDate, Date endDate) {
         Pageable pageable = PageRequest.of(page, size);
+
+        // we minus and add the date because in query we will get the in between dates
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+
+        startCalendar.add(Calendar.DATE, -1);
+        startDate = startCalendar.getTime();
+
+        endCalendar.add(Calendar.DATE, 1);
+        endDate = endCalendar.getTime();
+
         Page<AuditTrail> audiTrails = auditTrailRepoisitory
                 .findAuditTrailFilterByStartDateAndEndDateOrderByCreatedAtDesc(startDate, endDate, pageable);
+
         return new ResponseEntity<>(audiTrails, HttpStatus.OK);
     }
 

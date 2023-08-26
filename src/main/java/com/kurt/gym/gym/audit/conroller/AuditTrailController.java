@@ -38,9 +38,6 @@ public class AuditTrailController {
             return auditTrailService.data(search, size, page - 1);
         }
 
-        System.out.println(startDate);
-        System.out.println(endDate);
-
         if (startDate.after(endDate)) {
             return ApiMessage.successResponse("End Date should be after Start Date");
         }

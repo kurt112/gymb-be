@@ -31,6 +31,7 @@ import com.kurt.gym.gym.store.service.StoreService;
 import com.kurt.gym.helper.Action;
 import com.kurt.gym.helper.Charges;
 import com.kurt.gym.helper.service.ApiMessage;
+import com.kurt.gym.infrastructure.jwt.Jwt;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class CustomerImpl implements CustomerService {
     private final StoreService storeService;
     private final AuditTrailService auditTrailService;
     private final MembershipWithUserRepository membershipWithUserRepository;
+    private final Jwt jwt;
 
     Logger logger = LoggerFactory.getLogger(CustomerImpl.class);
 
@@ -204,7 +206,7 @@ public class CustomerImpl implements CustomerService {
     public ResponseEntity<?> topUpCustomer(String userTokenAssign, long userId, double amount) {
 
         User user = userRepository.getReferenceById(userId);
-
+        User assignedUser = jwt.getUserInToken(userTokenAssign);
         if (user == null) {
             return ApiMessage.errorResponse("User not found");
         }
@@ -226,14 +228,14 @@ public class CustomerImpl implements CustomerService {
 
         // TODO: change the .user to the current logind user
 
-        String assignUser = user.getLastName().toUpperCase() + ", " + user.getFirstName();
+        String assignUser = assignedUser.getLastName().toUpperCase() + ", " + assignedUser.getFirstName();
         String appliedUser = user.getLastName().toUpperCase() + ", " + user.getFirstName();
 
         AuditTrail auditTrail = AuditTrail
                 .builder()
-                .message(assignUser + " Top up customer " + appliedUser + " value of " + topUpAMount)
+                .message(assignUser + " Top up to customer " + appliedUser + " value of " + topUpAMount)
                 .customer(user)
-                .user(user)
+                .user(assignedUser)
                 .action(Action.TOP_UP)
                 .build();
 

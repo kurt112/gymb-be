@@ -6,6 +6,7 @@ import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kurt.gym.gym.store.model.Store;
 
 import jakarta.persistence.Column;
@@ -30,7 +31,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class User {
+public class User implements Comparable<User> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +43,7 @@ public class User {
 
     @Column(unique = true)
     private String email;
-    
+
     private String password;
 
     @Column(unique = true)
@@ -62,24 +63,36 @@ public class User {
 
     private BigDecimal pointsAmount;
     private BigDecimal cardValue;
-    
+
     private String role;
-    
+
+    // user details security
+    @JsonProperty("isAccountNotExpired")
+    private boolean isAccountNotExpired;
+
+    @JsonProperty("isAccountNotLocked")
+    private boolean isAccountNotLocked;
+
+    @JsonProperty("isCredentialNotExpired")
+    private boolean isCredentialNotExpired;
+
+    @JsonProperty("isEnabled")
+    private boolean isEnabled;
+
     @ManyToOne
     @JoinColumn(name = "assign_store")
     private Store store;
-        
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Date createdAt;
-    
+
     @UpdateTimestamp
     private Date updatedAt;
 
     // for customer table
     // do not change the order!!!!
-    public User (String firstName, String lastName, Date birthDate, String sex, String cellphone, String email){
+    public User(String firstName, String lastName, Date birthDate, String sex, String cellphone, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
@@ -88,9 +101,10 @@ public class User {
         this.email = email;
     }
 
-      // for  employee table
+    // for employee table
     // do not change the order!!!!
-    public User (String firstName, String lastName, Date birthDate, String sex, String cellphone, String email, String role){
+    public User(String firstName, String lastName, Date birthDate, String sex, String cellphone, String email,
+            String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
@@ -100,10 +114,9 @@ public class User {
         this.role = role;
     }
 
-
     // for customer attendance table
     // do not change the order!!!!
-    public User(String firstName, String lastName, BigDecimal pointsAmount, BigDecimal cardValue){
+    public User(String firstName, String lastName, BigDecimal pointsAmount, BigDecimal cardValue) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.pointsAmount = pointsAmount;
@@ -112,8 +125,22 @@ public class User {
 
     @PrePersist
     public void prePersist() {
-       this.role = role.toLowerCase();
+        this.role = role.toLowerCase();
     }
 
+    @Override
+    public int compareTo(User o) {
 
+        return o.getLastName().compareToIgnoreCase(lastName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        User tempUser = (User) o;
+        return this.id == tempUser.id;
+    }
 }

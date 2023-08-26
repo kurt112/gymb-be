@@ -14,4 +14,6 @@ public interface UserService extends BaseService<User> {
     ResponseEntity<Page<User>> data(String search,  int size, int page);
     
     ResponseEntity<User> findOne(Long id);
+
+    User findByEmail(String email);
 }
