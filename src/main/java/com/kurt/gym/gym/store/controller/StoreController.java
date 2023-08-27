@@ -30,7 +30,10 @@ public class StoreController {
     public ResponseEntity<?> getStoreData(@PathVariable long id) {
         return storeService.findOne(id);
     }
-    
 
-    
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<?> getStoreDashboard(@PathVariable long id) {
+        return storeService.dashboard(id);
+    }
+
 }

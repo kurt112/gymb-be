@@ -11,20 +11,23 @@ import jakarta.transaction.Transactional;
 
 @Transactional
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    @Query("select e.id from Employee e where e.id = ?1")
-    Long isExist(Long id);
+        @Query("select e.id from Employee e where e.id = ?1")
+        Long isExist(Long id);
 
-    @Query("select new com.kurt.gym.employee.model.Employee(e.id, new com.kurt.gym.auth.model.user.User(e.user.firstName,e.user.lastName, e.user.birthDate, e.user.sex, e.user.cellphone,e.user.email, e.user.role)) "
-            +
-            "from Employee e where (e.user.role like %?1% or e.user.sex like %?1% or e.user.firstName like %?1% or e.user.lastName like %?1% or e.user.cellphone like %?1% or e.user.email like %?1%) order by e.createdAt desc")
-    Page<Employee> findAllByOrderByCreatedAtDesc(String search, Pageable pageable);
+        @Query("select new com.kurt.gym.employee.model.Employee(e.id, new com.kurt.gym.auth.model.user.User(e.user.firstName,e.user.lastName, e.user.birthDate, e.user.sex, e.user.cellphone,e.user.email, e.user.role)) "
+                        +
+                        "from Employee e where (e.user.role like %?1% or e.user.sex like %?1% or e.user.firstName like %?1% or e.user.lastName like %?1% or e.user.cellphone like %?1% or e.user.email like %?1%) order by e.createdAt desc")
+        Page<Employee> findAllByOrderByCreatedAtDesc(String search, Pageable pageable);
 
-    @Query("select new com.kurt.gym.helper.model.AutoComplete(e.id, CONCAT(e.user.lastName, ', ' , e.user.firstName)) from Employee e where e.user.role = 'coach' and CONCAT(e.user.lastName, ',' , e.user.firstName) like %?1%")
-    Page<AutoComplete> findEmployeeCoachBySearch(String search, Pageable pageable);
+        @Query("select new com.kurt.gym.helper.model.AutoComplete(e.id, CONCAT(e.user.lastName, ', ' , e.user.firstName)) from Employee e where e.user.role = 'coach' and CONCAT(e.user.lastName, ',' , e.user.firstName) like %?1%")
+        Page<AutoComplete> findEmployeeCoachBySearch(String search, Pageable pageable);
 
-    @Query("select new com.kurt.gym.employee.model.Employee(e.id, new com.kurt.gym.auth.model.user.User(e.user.firstName,e.user.lastName, e.user.birthDate, e.user.sex, e.user.cellphone,e.user.email, e.user.role)) "
-            +
-            "from Employee e where (e.user.role like %?1% or e.user.sex like %?1% or e.user.firstName like %?1% or e.user.lastName like %?1% or e.user.cellphone like %?1% or e.user.email like %?1%) and e.user.role =?2 order by e.createdAt desc")
-    Page<Employee> findAllEmployeeWithRoleByOrderByCreatedAtDesc(String search, String role, Pageable pageable);
+        @Query("select new com.kurt.gym.employee.model.Employee(e.id, new com.kurt.gym.auth.model.user.User(e.user.firstName,e.user.lastName, e.user.birthDate, e.user.sex, e.user.cellphone,e.user.email, e.user.role)) "
+                        +
+                        "from Employee e where (e.user.role like %?1% or e.user.sex like %?1% or e.user.firstName like %?1% or e.user.lastName like %?1% or e.user.cellphone like %?1% or e.user.email like %?1%) and e.user.role =?2 order by e.createdAt desc")
+        Page<Employee> findAllEmployeeWithRoleByOrderByCreatedAtDesc(String search, String role, Pageable pageable);
+
+        @Query("select count(e.id) from Employee e where e.user.role = 'coach'")
+        Long countCoach();
 
 }
