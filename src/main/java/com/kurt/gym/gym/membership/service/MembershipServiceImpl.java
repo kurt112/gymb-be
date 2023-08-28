@@ -6,6 +6,7 @@ import java.util.Date;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     @CachePut(cacheNames = { "memebership" }, key = "#t.id")
+    @CacheEvict(value = "memberhip-table-data", allEntries = true)
     public ResponseEntity<?> save(Membership t) {
         membershipRepository.save(t);
 
@@ -39,7 +41,10 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "memebership" }, key = "#t.id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "memebership" }, key = "#t.id"),
+            @CacheEvict(value = "memberhip-table-data", allEntries = true)
+    })
     public ResponseEntity<?> delete(Membership t) {
 
         membershipRepository.delete(t);
@@ -48,7 +53,11 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "memebership" }, key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "memebership" }, key = "#id"),
+            @CacheEvict(value = "memberhip-table-data", allEntries = true)
+    })
+
     public ResponseEntity<?> deleteById(Long id) {
         membershipRepository.deleteById(id);
 
@@ -64,15 +73,14 @@ public class MembershipServiceImpl implements MembershipService {
         if (membership == null)
             return ApiMessage.errorResponse("No Membership Found");
 
-        // System.out.println(membership.getMembers());
-
         return new ResponseEntity<Membership>(membership, HttpStatus.OK);
     }
 
     @Override
+    @Cacheable(value = "memberhip-table-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<?> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Membership> memberships = membershipRepository.findAllByOrderByCreatedAtDesc(search,pageable);
+        Page<Membership> memberships = membershipRepository.findAllByOrderByCreatedAtDesc(search, pageable);
 
         return new ResponseEntity<>(memberships, HttpStatus.OK);
     }

@@ -5,6 +5,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,10 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "store-reference", key = "#t.id"),
+            @CacheEvict(value = "store", key = "#t.id")
+    })
     public ResponseEntity<HashMap<String, String>> delete(Store t) {
         this.storeRepository.delete(t);
 
@@ -58,6 +65,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @Cacheable(value = "store", key = "#id")
     public ResponseEntity<?> findOne(Long id) {
         Store store = this.storeRepository.findById(id).orElse(null);
 
@@ -70,6 +78,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @Cacheable(value = "store-reference", key = "#id")
     public Store referencedById(Long id) {
         return storeRepository.getReferenceById(id);
     }
@@ -103,9 +112,10 @@ public class StoreServiceImpl implements StoreService {
         storeRepository.saveAndFlush(store);
     }
 
+    // wil update every 1 hour
     @Override
+    @Cacheable(value="dashboard", key="#id")
     public ResponseEntity<?> dashboard(Long id) {
-        // TODO Query per store assigned
         HashMap<String, Object> result = new HashMap<String, Object>();
 
         Long clientCount = customerRepository.count();

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,7 @@ public class CustomerImpl implements CustomerService {
 
     @Override
     @CachePut(cacheNames = { "customer" }, key = "#t.id")
+    @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true)
     public ResponseEntity<Customer> save(Customer t) {
         customerRepository.saveAndFlush(t);
 
@@ -61,7 +63,11 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "customer" }, key = "#t.id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "customer" }, key = "#t.id"),
+            @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true),
+            @CacheEvict(cacheNames = { "customer-reference-rfId" }, key = "#t.rfId")
+    })
     public ResponseEntity<HashMap<String, String>> delete(Customer t) {
 
         Customer fromDb = customerRepository.findById(t.getId()).orElse(null);
@@ -75,7 +81,11 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "customer" }, key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "customer" }, key = "#id"),
+            @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true),
+            @CacheEvict(cacheNames = { "customer-reference-rfId" }, allEntries = true)
+    })
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
         Customer fromDb = customerRepository.findById(id).orElse(null);
@@ -89,6 +99,7 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
+    @Cacheable(value = "customers-table-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Customer> customers = customerRepository.findAllByOrderByCreatedAtDesc(search, pageable);
@@ -245,6 +256,7 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
+    @Cacheable(value = "customer-reference-rfId", key = "#rfId")
     public ResponseEntity<?> getUserIdByCustomerRfId(String rfId) {
 
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);

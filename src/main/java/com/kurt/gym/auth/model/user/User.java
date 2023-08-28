@@ -6,6 +6,7 @@ import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kurt.gym.gym.store.model.Store;
 
@@ -79,6 +80,7 @@ public class User implements Comparable<User> {
     @JsonProperty("isEnabled")
     private boolean isEnabled;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "assign_store")
     private Store store;

@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,13 +48,15 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Transactional
     @Override
-    // @CachePut(cacheNames = { "gymClass" }, key = "#t.id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
+    })
     public ResponseEntity<GymClass> save(GymClass t) {
 
         Calendar dateStart = Calendar.getInstance();
 
         GymClassType gymClassType = t.getGymClassType();
-        
+
         System.out.println(gymClassType.getName());
 
         boolean isGymClassActive = true;
@@ -82,7 +84,10 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "gymClass" }, key = "#t.id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "gymClass" }, key = "#t.id"),
+            @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
+    })
     public ResponseEntity<?> delete(GymClass t) {
         GymClass gymClass = gymClassRepository.findById(t.getId()).orElse(null);
 
@@ -93,7 +98,11 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "gymClass" }, key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "gymClass" }, key = "#id"),
+            @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
+    })
+
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
@@ -105,10 +114,11 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Cacheable(value = "gym-class-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<GymClass>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         System.out.println(search);
-        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(search,pageable);
+        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(search, pageable);
 
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }
@@ -132,6 +142,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Cacheable(value = "gym-class-members", key = "#gymClassId")
     public ResponseEntity<?> getGymClassMembers(long gymClassId, String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GymClassWithUser> gymClassWithUser = gymClassWithUserRepositoy.getGymClassMembers(gymClassId, pageable);
@@ -140,6 +151,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @CacheEvict(value = "gym-class-members", key = "#gymClassId")
     public ResponseEntity<?> enrollCustomer(String rfId, long gymClassId) {
 
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
@@ -180,6 +192,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @CacheEvict(value = "gym-class-members", key = "#gymClassId")
     public ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId) {
 
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
@@ -205,6 +218,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Cacheable(value = "gym-class-schedules-all")
     public ResponseEntity<?> getGymClasses() {
         List<GymClass> list = gymClassRepository.getGymClassesSchedule();
 
@@ -213,6 +227,10 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-schedules", key = "#gymClassId"),
+            @CacheEvict(value = "gym-class-schedules-all", allEntries = true)
+    })
     public ResponseEntity<?> generateGymClassSchedule(long gymClassId, List<ScheduleData> scheduleDatas) {
 
         GymClass currentGymClass = gymClassRepository.findById(gymClassId).orElse(null);
@@ -291,6 +309,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Cacheable(value = "gym-class-schedules", key = "#gymClassId")
     public ResponseEntity<?> getGymClassSchedule(long gymClassId) {
         List<Schedule> list = scheduleRepository.getGymClassSchedules(gymClassId);
 
@@ -323,6 +342,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @CacheEvict("gym-class-types")
     public ResponseEntity<?> saveGymClassType(GymClassType gymClassType) {
 
         gymClassTypeRepository.save(gymClassType);
@@ -346,6 +366,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Cacheable("gym-class-types")
     public ResponseEntity<?> getGymClassTypes() {
         List<GymClassType> gymClassTypes = gymClassTypeRepository.findAll();
 
@@ -356,6 +377,7 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @Modifying
+    @CacheEvict("gym-class-types")
     public ResponseEntity<?> deleteGymClassType(Long id) {
         gymClassTypeRepository.deleteById(id);
 
@@ -363,6 +385,10 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-schedules", key = "#gymClassId"),
+            @CacheEvict(value = "gym-class-schedules-all", allEntries = true)
+    })
     public ResponseEntity<?> deleteGymClassSchedule(Long gymClassId, Long scheduleId) {
         Schedule schedule = scheduleRepository.getReferenceById(scheduleId);
 
@@ -378,6 +404,10 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-schedules", key = "#gymClassId"),
+            @CacheEvict(value = "gym-class-schedules-all", allEntries = true)
+    })
     public ResponseEntity<?> saveGymClassSchedule(Long gymClassId, Schedule schedule) {
 
         GymClass gymClass = gymClassRepository.getReferenceById(gymClassId);

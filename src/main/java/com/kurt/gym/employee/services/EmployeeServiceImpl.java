@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
 
     @Override
-    @CachePut(cacheNames = { "employee" }, key = "#t.id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "employee-data", allEntries = true)
+    })
     public ResponseEntity<Employee> save(Employee t) {
         employeeRepository.save(t);
 
@@ -36,7 +39,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "employee" }, key = "#t.id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "employee" }, key = "#t.id"),
+            @CacheEvict(cacheNames = "employee-data", allEntries = true),
+            @CacheEvict(cacheNames = { "employee-reference" }, key = "#t.id")
+    })
     public ResponseEntity<HashMap<String, String>> delete(Employee t) {
         Employee dbEmp = employeeRepository.findById(t.getId()).orElse(null);
         if (dbEmp != null)
@@ -46,7 +53,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "employee" }, key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "employee" }, key = "#id"),
+            @CacheEvict(cacheNames = "employee-data", allEntries = true),
+            @CacheEvict(cacheNames = { "employee-reference" }, key = "#id")
+    })
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
         Employee dbEmp = employeeRepository.findById(id).orElse(null);
         if (dbEmp != null)
@@ -57,9 +68,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<Employee>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(search,  pageable);
+        Page<Employee> employees = employeeRepository.findAllByOrderByCreatedAtDesc(search, pageable);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
@@ -78,6 +90,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employee-reference", key = "#id")
     public Employee referencedById(Long id) {
         return employeeRepository.getReferenceById(id);
     }
@@ -93,9 +106,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #role, #size, #page)")
     public ResponseEntity<?> data(String search, String role, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role, pageable);
+        Page<Employee> employees = employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role,
+                pageable);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.schedule.model.Schedule;
 
@@ -19,7 +20,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -81,11 +81,10 @@ public class GymClass {
     }
 
     // please dont' change this constructor using for gym repositories
-    public GymClass(long id, String name, GymClassType gymClassType, List<Schedule> schedules) {
+    public GymClass(long id, String name, GymClassType gymClassType) {
         this.id = id;
         this.name = name;
         this.gymClassType = gymClassType;
-        this.schedules = schedules;
     }
 
     // this is for custom fetching in table if you want to fetch another create
