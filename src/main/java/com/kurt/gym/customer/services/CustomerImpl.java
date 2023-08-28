@@ -49,7 +49,7 @@ public class CustomerImpl implements CustomerService {
     private final MembershipWithUserRepository membershipWithUserRepository;
     private final Jwt jwt;
 
-    Logger logger = LoggerFactory.getLogger(CustomerImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(CustomerImpl.class);
 
     @Override
     @CachePut(cacheNames = { "customer" }, key = "#t.id")

@@ -1,5 +1,7 @@
 package com.kurt.gym.config.cache;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -16,9 +18,12 @@ public class CachingConfig {
     @Autowired
     CacheManager cacheManager;
 
-    public void evictAllCaches() {
+    private final Logger logger = LoggerFactory.getLogger(CachingConfig.class);
+
+    private void evictAllCaches() {
         cacheManager.getCacheNames().stream()
                 .forEach(cacheName -> {
+                    logger.info("Clearing Cache -> " + cacheName);
                     Cache currentCache = cacheManager.getCache(cacheName);
 
                     if (currentCache != null) {
@@ -29,6 +34,7 @@ public class CachingConfig {
     }
 
     // 1 hour
+    // this method will clear all cache entries every 1 hour
     @Scheduled(fixedRate = 3600000)
     public void evictAllcachesAtIntervals() {
         evictAllCaches();
