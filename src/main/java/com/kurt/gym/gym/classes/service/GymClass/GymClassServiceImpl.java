@@ -1,22 +1,5 @@
 package com.kurt.gym.gym.classes.service.GymClass;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.customer.model.Customer;
 import com.kurt.gym.customer.services.CustomerRepository;
@@ -30,9 +13,20 @@ import com.kurt.gym.helper.service.ApiMessage;
 import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;
 import com.kurt.gym.schedule.service.ScheduleRepository;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,11 +39,11 @@ public class GymClassServiceImpl implements GymClassService {
     private final ScheduleRepository scheduleRepository;
     private final EmployeeRepository employeeRepository;
     private final GymClassTypeRepository gymClassTypeRepository;
-
     @Transactional
     @Override
     @Caching(evict = {
-            @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
+            @CacheEvict(cacheNames = "gym-class-data", allEntries = true),
+            @CacheEvict(cacheNames = { "gymClass" }, key = "#t.id")
     })
     public ResponseEntity<GymClass> save(GymClass t) {
 
@@ -59,26 +53,25 @@ public class GymClassServiceImpl implements GymClassService {
 
         System.out.println(gymClassType.getName());
 
-        boolean isGymClassActive = true;
-
         if (t.getDateStart() != null) {
             dateStart.setTime(t.getDateStart());
-            isGymClassActive = false;
         }
 
         Calendar dateEnd = Calendar.getInstance();
 
         if (t.getDateEnd() != null) {
             dateEnd.setTime(t.getDateEnd());
-            isGymClassActive = false;
         }
 
+        boolean isGymClassActive = t.getDateStart() != null && t.getDateEnd() != null;
+
+        t.setGymClassType(null);
         t.setIsActive(isGymClassActive);
         gymClassRepository.save(t);
 
         t.setGymClassType(gymClassType);
         gymClassRepository.save(t);
-        return new ResponseEntity<GymClass>(
+        return new ResponseEntity<>(
                 t,
                 HttpStatus.OK);
     }
@@ -151,7 +144,9 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
-    @CacheEvict(value = "gym-class-members", key = "#gymClassId")
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-members", key ="#gymClassId" )
+    })
     public ResponseEntity<?> enrollCustomer(String rfId, long gymClassId) {
 
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
@@ -192,7 +187,9 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     @Override
-    @CacheEvict(value = "gym-class-members", key = "#gymClassId")
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-members", key ="#gymClassId" )
+    })
     public ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId) {
 
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
@@ -313,6 +310,8 @@ public class GymClassServiceImpl implements GymClassService {
     public ResponseEntity<?> getGymClassSchedule(long gymClassId) {
         List<Schedule> list = scheduleRepository.getGymClassSchedules(gymClassId);
 
+        System.out.println(list.size());
+
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
@@ -338,15 +337,18 @@ public class GymClassServiceImpl implements GymClassService {
 
         this.gymClassRepository.save(gymClass);
 
-        return ApiMessage.successResponse("Assigne insturctor success");
+        return ApiMessage.successResponse("Assign instructor success");
     }
 
     @Override
-    @CacheEvict("gym-class-types")
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-types", allEntries = true)
+    })
     public ResponseEntity<?> saveGymClassType(GymClassType gymClassType) {
 
+        System.out.println("i am here");
         gymClassTypeRepository.save(gymClassType);
-
+//        Objects.requireNonNull(cacheManager.getCache("gym-class-types")).clear();
         return new ResponseEntity<GymClassType>(
                 gymClassType,
                 HttpStatus.OK);
@@ -370,17 +372,18 @@ public class GymClassServiceImpl implements GymClassService {
     public ResponseEntity<?> getGymClassTypes() {
         List<GymClassType> gymClassTypes = gymClassTypeRepository.findAll();
 
-        return new ResponseEntity<List<GymClassType>>(
+        return new ResponseEntity<>(
                 gymClassTypes,
                 HttpStatus.OK);
     }
 
     @Override
     @Modifying
-    @CacheEvict("gym-class-types")
+    @Caching(evict = {
+            @CacheEvict(value = "gym-class-types", allEntries = true)
+    })
     public ResponseEntity<?> deleteGymClassType(Long id) {
         gymClassTypeRepository.deleteById(id);
-
         return ApiMessage.successResponse("Gym class type deleted successfully");
     }
 

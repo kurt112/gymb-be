@@ -1,4 +1,5 @@
 package com.kurt.gym.employee.model;
+
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,27 +33,28 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(unique = true)
     private String rfID;
 
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn
     private User user;
 
     @CreationTimestamp
     private Date createdAt;
-    
+
     @UpdateTimestamp
     private Date updatedAt;
 
-    public static Employee buildEmployeeFromReference(Employee employee){
+    public static Employee buildEmployeeFromReference(Employee employee) {
         return Employee.builder()
-        .id(employee.getId())
-        .user(employee.getUser())
-        .createdAt(employee.getCreatedAt())
-        .updatedAt(employee.getUpdatedAt())
-        .build();
+                .id(employee.getId())
+                .user(employee.getUser())
+                .rfID(employee.getRfID())
+                .createdAt(employee.getCreatedAt())
+                .updatedAt(employee.getUpdatedAt())
+                .build();
     }
 
     // FOr employee table creation
@@ -60,5 +62,5 @@ public class Employee {
         this.id = id;
         this.user = user;
     }
-    
+
 }

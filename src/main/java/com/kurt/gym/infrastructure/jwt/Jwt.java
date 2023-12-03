@@ -20,8 +20,8 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class Jwt implements Serializable {
 
-    @Value("${secret.key}")
-    private String SECRET_KEY;
+//    @Value("${secret.key}")
+    private String SECRET_KEY = "secret";
     public final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
 
     private final UserRepository userRepository;

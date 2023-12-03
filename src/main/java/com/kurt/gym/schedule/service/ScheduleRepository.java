@@ -19,7 +19,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     @Query(value = "DELETE FROM schedule where id = ?1", nativeQuery = true)
     void deleteScheduleById(Long id);
 
-    // dont medoffy this to jpql for speed performance reasons
+    // dont medify this to jpql for speed performance reasons
     @Query(value = "SELECT * FROM Schedule WHERE gym_class_id = ?1", nativeQuery = true)
     List<Schedule> getGymClassSchedules(Long id);
 

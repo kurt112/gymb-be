@@ -122,13 +122,13 @@ public class GymClassController {
     }
 
     @GetMapping("/types")
-    public ResponseEntity<?> createGymClassType() {
+    public ResponseEntity<?> getGymClassTypes() {
 
         return gymClassService.getGymClassTypes();
     }
 
     @GetMapping("/types/{id}")
-    public ResponseEntity<?> createGymClassType(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getGymClassType(@PathVariable("id") Long id) {
 
         return gymClassService.getGymClassType(id);
     }

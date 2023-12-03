@@ -1,10 +1,8 @@
 package com.kurt.gym.employee.services;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
@@ -28,12 +26,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(cacheNames = "employee-data", allEntries = true)
+            @CacheEvict(cacheNames = "employee-data", allEntries = true),
+            @CacheEvict(cacheNames = { "employee" }, key = "#t.id")
     })
     public ResponseEntity<Employee> save(Employee t) {
+        t.getUser().activate();
         employeeRepository.save(t);
 
-        return new ResponseEntity<Employee>(
+        return new ResponseEntity<>(
                 t,
                 HttpStatus.OK);
     }
@@ -84,7 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeFromDb == null)
             return ApiMessage.errorResponse("Employee not found");
 
-        return new ResponseEntity<Employee>(
+        return new ResponseEntity<>(
                 Employee.buildEmployeeFromReference(employeeFromDb),
                 HttpStatus.OK);
     }
@@ -102,7 +102,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         System.out.println(employees.getContent());
 
-        return new ResponseEntity<List<AutoComplete>>(employees.getContent(), HttpStatus.OK);
+        return new ResponseEntity<>(employees.getContent(), HttpStatus.OK);
     }
 
     @Override

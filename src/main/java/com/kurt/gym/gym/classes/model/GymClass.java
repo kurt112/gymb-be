@@ -101,6 +101,10 @@ public class GymClass {
 
     @PrePersist
     public void prePersist() {
+        if(this.instructor == null){
+            this.setInstructorName("No Instructor Assigned");
+            return;
+        }
         setInstructorName(this.instructor.getUser().getLastName() + ", " + this.instructor.getUser().getFirstName());
     }
 

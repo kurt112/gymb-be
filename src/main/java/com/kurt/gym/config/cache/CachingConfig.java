@@ -1,5 +1,6 @@
 package com.kurt.gym.config.cache;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +12,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 @Configuration
-@EnableCaching
 @EnableScheduling
+@RequiredArgsConstructor
 public class CachingConfig {
 
-    @Autowired
-    CacheManager cacheManager;
-
+    private final CacheManager cacheManager;
     private final Logger logger = LoggerFactory.getLogger(CachingConfig.class);
 
     private void evictAllCaches() {
-        cacheManager.getCacheNames().stream()
+        cacheManager.getCacheNames()
                 .forEach(cacheName -> {
                     logger.info("Clearing Cache -> " + cacheName);
                     Cache currentCache = cacheManager.getCache(cacheName);
@@ -39,5 +38,6 @@ public class CachingConfig {
     public void evictAllcachesAtIntervals() {
         evictAllCaches();
     }
+
 
 }

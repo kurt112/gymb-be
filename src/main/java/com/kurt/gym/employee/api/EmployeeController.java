@@ -17,6 +17,8 @@ import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("employees")
 @RequiredArgsConstructor
@@ -49,7 +51,7 @@ public class EmployeeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {
-        if (id != employee.getId())
+        if (!Objects.equals(id, employee.getId()))
             return ApiMessage.errorResponse("id is not equal to employee payload id");
 
         if (employeeService.referencedById(id) == null)
