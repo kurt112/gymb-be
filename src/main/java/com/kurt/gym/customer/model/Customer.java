@@ -3,25 +3,13 @@ package com.kurt.gym.customer.model;
 import java.util.Date;
 import java.util.Set;
 
+
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.kurt.gym.auth.model.user.User;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,7 +44,9 @@ public class Customer {
 
     private Boolean isMember;
 
-    // for attendace if the customer is out or in in gym
+    private CustomerStatus status;
+
+    // for attendance if the customer is out or in gym
     private Boolean isOut;
 
     @Temporal(TemporalType.DATE)
@@ -98,19 +88,24 @@ public class Customer {
 
     @PrePersist
     public void prePersist() {
-        if(isMember == null){
-            this.isMember = false;
-        }
+
+        this.isMember = !this.rfId.isBlank();
+
+        // if the status is null meaning it's for creation
+        if(this.isMember) this.status = CustomerStatus.MEMBER;
+        else this.status = CustomerStatus.NON_MEMBER;
 
         if(isOut == null){
             this.isOut = false;
         }
+
     }
     
     // for customer table
-    public Customer (long id, User user) {
+    public Customer (long id, User user, CustomerStatus status) {
         this.id = id;
         this.user = user;
+        this.status = status;
     }
 
 }

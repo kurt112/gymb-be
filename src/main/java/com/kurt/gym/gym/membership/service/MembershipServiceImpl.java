@@ -1,8 +1,15 @@
 package com.kurt.gym.gym.membership.service;
 
-import java.util.Calendar;
-import java.util.Date;
-
+import com.kurt.gym.customer.model.Customer;
+import com.kurt.gym.customer.services.CustomerRepository;
+import com.kurt.gym.gym.membership.model.Membership;
+import com.kurt.gym.gym.membership.model.MembershipWithUser;
+import com.kurt.gym.helper.Charges;
+import com.kurt.gym.helper.service.ApiMessage;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,22 +21,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kurt.gym.customer.model.Customer;
-import com.kurt.gym.customer.services.CustomerRepository;
-import com.kurt.gym.gym.membership.model.Membership;
-import com.kurt.gym.gym.membership.model.MembershipWithUser;
-import com.kurt.gym.helper.Charges;
-import com.kurt.gym.helper.service.ApiMessage;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Calendar;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MembershipServiceImpl implements MembershipService {
 
     private final MembershipRepository membershipRepository;
     private final MembershipWithUserRepository membershipWithUserRepository;
     private final CustomerRepository customerRepository;
+
+    private final Logger logger = LoggerFactory.getLogger(MembershipServiceImpl.class);
 
     @Override
     @CachePut(cacheNames = { "memebership" }, key = "#t.id")
@@ -67,7 +71,6 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     @Cacheable(value = "memebership", key = "#id")
     public ResponseEntity<?> findOne(Long id) {
-        System.out.println("i am here");
         Membership membership = membershipRepository.findById(id).orElse(null);
 
         if (membership == null)
@@ -91,7 +94,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public ResponseEntity<?> getMembershipMembers(long membershipId, String search, int size, int page) {
+    public ResponseEntity<?> getMembershipMembers(Long membershipId, String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<MembershipWithUser> membershipWithUserPages = membershipRepository.getmembershipMembers(membershipId,
                 pageable);
@@ -99,12 +102,21 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public ResponseEntity<?> enrollCustomer(String rfId, long membershipId) {
+    public ResponseEntity<?> enrollCustomer(String rfId, Long membershipId) {
+
+        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+
+        return enrollCustomerById(customerId, membershipId);
+    }
+
+    @Override
+    public ResponseEntity<?> enrollCustomerById(Long customerId, Long membershipId) {
+
+        logger.info("Enrolling Customer In Membership with ID -> " + customerId);
 
         Calendar currentDate = Calendar.getInstance();
         currentDate.setTime(new Date());
 
-        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
 
         if (customerId == null) {
             return ApiMessage.errorResponse("No Customer Found");
@@ -118,7 +130,7 @@ public class MembershipServiceImpl implements MembershipService {
             return ApiMessage.errorResponse("Membership not found");
         }
 
-        if (currentDate.getTime().after(membership.getMembershipPromoExpiration())) {
+        if (membership.getMembershipPromoExpiration() != null && currentDate.getTime().after(membership.getMembershipPromoExpiration())) {
             return ApiMessage.errorResponse("Membership promo expired");
         }
 
@@ -130,7 +142,6 @@ public class MembershipServiceImpl implements MembershipService {
             return ApiMessage.errorResponse("Customer is already a member!");
         }
 
-        System.out.println("i am here");
 
         Calendar endDate = Calendar.getInstance();
         endDate.setTime(new Date());
@@ -158,13 +169,15 @@ public class MembershipServiceImpl implements MembershipService {
         customer.setMembershipDuration(endDate.getTime());
 
         customerRepository.save(customer);
+        logger.info("Success Enrolling Customer Membership with ID -> " + customerId);
 
         return ApiMessage.successResponse("Membership enrolled successfully");
     }
 
     @Override
-    public ResponseEntity<?> unEnrollMembershipCustomer(String rfId) {
-        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+    public ResponseEntity<?> unEnrollMembershipCustomerByCustomerId(Long customerId) {
+
+        logger.info("Un-enrolling membership Customer ID -> " + customerId);
 
         if (customerId == null) {
             return ApiMessage.errorResponse("No Customer Found");
@@ -191,7 +204,20 @@ public class MembershipServiceImpl implements MembershipService {
         membershipWithUserRepository.save(membershipWithUser);
         customerRepository.save(customer);
 
+        logger.info("Done enrolling membership Customer ID -> " + customer);
         return ApiMessage.successResponse("Customer membership pull out successfully");
+    }
+
+    @Override
+    public Membership getDefaultMembership() {
+        return membershipRepository.getReferenceById(1L);
+    }
+
+    @Override
+    public ResponseEntity<?> unEnrollMembershipCustomerByRfId(String rfId) {
+        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+
+        return unEnrollMembershipCustomerByCustomerId(customerId);
     }
 
 }

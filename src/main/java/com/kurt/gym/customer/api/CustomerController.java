@@ -74,12 +74,33 @@ public class CustomerController {
         return customerService.updateCustomerAttendaceByRfId(rfId);
     }
 
+    @GetMapping("attendance")
+    public ResponseEntity<?> updateCustomerAttendanceByLastNameFirstNameAndMiddleName(
+            @RequestParam("first-name") String firstName,
+            @RequestParam("last-name") String lastName,
+            @RequestParam("middle-name") String middleName) {
+
+        return customerService.updateCustomerAttendanceByFirstNameLastNameAndMiddleName(firstName,lastName, middleName);
+    }
+
     @PostMapping("/top-up/{assignUserToken}/{userId}")
     public ResponseEntity<?> postMethodName(@PathVariable String assignUserToken,
             @PathVariable long userId, @RequestParam(value = "amount") double amount) {
         // TODO: process POST request
 
         return customerService.topUpCustomer(assignUserToken, userId, amount);
+    }
+
+    @PostMapping("/top-up/{assignUserToken}")
+    public ResponseEntity<?> postMethodName(@PathVariable String assignUserToken,
+                                             @RequestParam(value = "amount") double amount,
+                                            @RequestParam("first-name") String firstName,
+                                            @RequestParam("last-name") String lastName,
+                                            @RequestParam("middle-name") String middleName
+                                            ) {
+        // TODO: process POST request
+
+        return customerService.manualTopUpCustomer(assignUserToken, firstName, lastName, middleName, amount);
     }
 
     @GetMapping("/get-user-id/{rfId}")

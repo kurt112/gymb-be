@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -236,7 +237,7 @@ public class GymClassServiceImpl implements GymClassService {
             return ApiMessage.errorResponse("No Gym Class Found");
         }
 
-        // Looping the scheudle data so that we can assure the arrange ment of scheyudle
+        // Looping the schedule data so that we can assure the arrangement of schedule
         // with day
 
         HashMap<Short, ScheduleData> scheduleMap = new HashMap<>();
@@ -418,7 +419,7 @@ public class GymClassServiceImpl implements GymClassService {
         Schedule existingSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
 
         if (existingSchedule == null || existingSchedule.getGymClass().getId() != gymClass.getId()) {
-            return ApiMessage.errorResponse("Schedule does not exsit in current gym class");
+            return ApiMessage.errorResponse("Schedule does not exist in current gym class");
         }
 
         if (schedule != null) {

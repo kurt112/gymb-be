@@ -35,7 +35,7 @@ public class CachingConfig {
     // 1 hour
     // this method will clear all cache entries every 1 hour
     @Scheduled(fixedRate = 3600000)
-    public void evictAllcachesAtIntervals() {
+    public void evictAllCachesAtIntervals() {
         evictAllCaches();
     }
 

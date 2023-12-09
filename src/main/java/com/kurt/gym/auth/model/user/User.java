@@ -65,7 +65,7 @@ public class User implements Comparable<User> {
     private BigDecimal pointsAmount;
     private BigDecimal cardValue;
 
-    private String role;
+    private UserRole role;
 
     // user details security
     @JsonProperty("isAccountNotExpired")
@@ -106,7 +106,7 @@ public class User implements Comparable<User> {
     // for employee table
     // do not change the order!!!!
     public User(String firstName, String lastName, Date birthDate, String sex, String cellphone, String email,
-            String role) {
+            UserRole role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
@@ -125,10 +125,6 @@ public class User implements Comparable<User> {
         this.cardValue = cardValue;
     }
 
-    @PrePersist
-    public void prePersist() {
-        this.role = role.toLowerCase();
-    }
 
     @Override
     public int compareTo(User o) {

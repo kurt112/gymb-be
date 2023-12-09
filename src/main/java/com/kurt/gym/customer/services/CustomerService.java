@@ -14,9 +14,11 @@ public interface CustomerService extends BaseService<Customer> {
   ResponseEntity<?> getTodaysCustomer(String search, int size, int page);
 
   ResponseEntity<?> topUpCustomer(String userTokenAssign, long userId, double amount);
-
+  ResponseEntity<?> manualTopUpCustomer(String userTokenAssign, String firstName, String lastName, String middleName, double amount);
   ResponseEntity<?> getUserIdByCustomerRfId(String rfId);
 
   void deductCustomerSubscription(User user);
+
+  ResponseEntity<?> updateCustomerAttendanceByFirstNameLastNameAndMiddleName(String firstName, String lastName, String middleName);
 
 }

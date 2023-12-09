@@ -3,6 +3,7 @@ package com.kurt.gym.gym.membership.model;
 import java.util.Date;
 import java.util.List;
 
+import com.kurt.gym.auth.model.user.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -29,7 +30,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-public class Membership {
+public class Membership implements Comparable<Membership> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,6 +75,24 @@ public class Membership {
         this.membershipPromoExpiration = membershipPromoExpiration;
         this.charge = charge;
         this.createdAt = createdAt;
+    }
+
+
+    @Override
+    public int compareTo(Membership o) {
+
+        return Long.compare(o.getId(), this.id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Membership tempMembership = (Membership) o;
+
+        return tempMembership.getId().equals(this.id);
     }
 
 }

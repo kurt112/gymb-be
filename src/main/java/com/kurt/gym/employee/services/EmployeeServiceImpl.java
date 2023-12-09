@@ -109,7 +109,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #role, #size, #page)")
     public ResponseEntity<?> data(String search, String role, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role,
+        Page<Employee> employees = employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, 1,
                 pageable);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);

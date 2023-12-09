@@ -1,11 +1,15 @@
 package com.kurt.gym.customer.services;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
+import com.kurt.gym.auth.model.user.UserRole;
+import com.kurt.gym.customer.model.CustomerStatus;
+import com.kurt.gym.gym.membership.service.MembershipService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -47,6 +51,7 @@ public class CustomerImpl implements CustomerService {
     private final StoreService storeService;
     private final AuditTrailService auditTrailService;
     private final MembershipWithUserRepository membershipWithUserRepository;
+    private final MembershipService membershipService;
     private final Jwt jwt;
 
     private final Logger logger = LoggerFactory.getLogger(CustomerImpl.class);
@@ -56,9 +61,10 @@ public class CustomerImpl implements CustomerService {
     @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true)
     public ResponseEntity<Customer> save(Customer t) {
         t.getUser().activate();
+        t.getUser().setRole(UserRole.CUSTOMER);
         customerRepository.saveAndFlush(t);
 
-        return new ResponseEntity<Customer>(
+        return new ResponseEntity<>(
                 t,
                 HttpStatus.OK);
     }
@@ -115,7 +121,7 @@ public class CustomerImpl implements CustomerService {
         if (fromDb == null)
             return ApiMessage.errorResponse("Customer not found");
 
-        return new ResponseEntity<Customer>(
+        return new ResponseEntity<>(
                 fromDb,
                 HttpStatus.OK);
     }
@@ -123,7 +129,7 @@ public class CustomerImpl implements CustomerService {
     @Override
     public ResponseEntity<?> updateCustomerAttendaceByRfId(String rfId) {
 
-        HashMap<String, String> result = new HashMap<String, String>();
+        HashMap<String, String> result = new HashMap<>();
         Long customerId = customerRepository.findCustomerIdByRfID(rfId);
 
         if (customerId == null)
@@ -132,72 +138,8 @@ public class CustomerImpl implements CustomerService {
         Customer customer = customerRepository.getReferenceById(customerId);
         User user = customer.getUser();
 
-        Calendar currenDate = Calendar.getInstance();
-        currenDate.setTime(new Date());
+        updateCustomerAttendance(customer,user, result);
 
-        if (user.getCardValue().doubleValue() < 0) {
-            customer.setIsMember(false);
-            customerRepository.save(customer);
-
-            logger.info("Please settle balance of " + user.getCardValue().doubleValue()
-                    + " and subscribe to new membership");
-
-            throw new UnsupportedOperationException("Please settle balance of " + user.getCardValue().doubleValue()
-                    + " and subscribe to new membership");
-        }
-
-        if (!customer.getIsMember()) {
-            throw new UnsupportedOperationException("Customer is not a member");
-        }
-
-        deductCustomerSubscription(user);
-
-        if (currenDate.getTime().after(customer.getMembershipDuration())) {
-            customer.setIsMember(false);
-            customerRepository.save(customer);
-            throw new UnsupportedOperationException("Membership expired!");
-        }
-
-        boolean isCustomerIsOut = customer.getIsOut();
-        String message = "Time In Successful";
-        if (isCustomerIsOut) {
-            customer.setTimeOut(new Date());
-            message = "Time Out Successful";
-        } else if (customer.getTimeIn() == null) {
-            customer.setTimeIn(new Date());
-        } else {
-            Calendar currentDate = Calendar.getInstance();
-            Calendar customerDate = Calendar.getInstance();
-            customerDate.setTime(customer.getTimeIn());
-
-            if (currentDate.get(Calendar.YEAR) == customerDate.get(Calendar.YEAR)
-                    && currentDate.get(Calendar.MONTH) == customerDate.get(Calendar.MONTH)
-                    && currentDate.get(Calendar.DAY_OF_MONTH) == customerDate.get(Calendar.DAY_OF_MONTH)) {
-                customer.setTimeIn(new Date());
-            } else {
-                Set<CustomerAttendance> customerAttendance = customer.getCustomerAttendance();
-                customerAttendance.add(CustomerAttendance.builder()
-                        .customer(customer)
-                        .timeIn(customer.getTimeIn())
-                        .timeOut(customer.getTimeOut())
-                        .build());
-                customer.setTimeIn(new Date());
-                customer.setTimeOut(null);
-                customer.setCustomerAttendance(customerAttendance);
-            }
-        }
-
-        customer.setIsOut(!isCustomerIsOut);
-
-        String fullName = "";
-
-        if (user != null) {
-            fullName = user.getFirstName() + " " + user.getLastName();
-        }
-
-        customerRepository.save(customer);
-        result.put("message", message);
-        result.put("user", fullName);
         return new ResponseEntity<Object>(result, HttpStatus.OK);
     }
 
@@ -223,35 +165,20 @@ public class CustomerImpl implements CustomerService {
             return ApiMessage.errorResponse("User not found");
         }
 
-        BigDecimal topUpAMount = BigDecimal.valueOf(amount);
-        BigDecimal newCardValue = user.getCardValue().add(topUpAMount);
+        topUp(user,assignedUser,amount);
 
-        Store store = user.getStore();
+        return ApiMessage.successResponse("Top up success");
+    }
 
-        user.setCardValue(newCardValue);
+    @Override
+    public ResponseEntity<?> manualTopUpCustomer(String userTokenAssign, String firstName, String lastName, String middleName, double amount) {
 
-        BigDecimal poinsEarned = topUpAMount.divide(store.getAmountNeedToEarnOnePoint());
-        BigDecimal totalPoints = poinsEarned.add(user.getPointsAmount());
+        Customer customer =  customerRepository.findCustomerByFirstNameLastNameAndMiddleName(firstName,lastName,middleName);
 
-        user.setPointsAmount(totalPoints);
+        if(customer.getUser() == null)  return ApiMessage.errorResponse("User not found");
 
-        userRepository.save(user);
-        storeService.insertSale(store, topUpAMount, new Date());
-
-        // TODO: change the .user to the current logind user
-
-        String assignUser = assignedUser.getLastName().toUpperCase() + ", " + assignedUser.getFirstName();
-        String appliedUser = user.getLastName().toUpperCase() + ", " + user.getFirstName();
-
-        AuditTrail auditTrail = AuditTrail
-                .builder()
-                .message(assignUser + " Top up to customer " + appliedUser + " value of " + topUpAMount)
-                .customer(user)
-                .user(assignedUser)
-                .action(Action.TOP_UP)
-                .build();
-
-        auditTrailService.save(auditTrail);
+        User assignedUser = jwt.getUserInToken(userTokenAssign);
+        topUp(customer.getUser(),assignedUser,amount);
 
         return ApiMessage.successResponse("Top up success");
     }
@@ -291,10 +218,10 @@ public class CustomerImpl implements CustomerService {
             return;
         }
 
-        BigDecimal membershipPrice = new BigDecimal(membershipWithUser.getPrice());
+        BigDecimal membershipPrice = BigDecimal.valueOf(membershipWithUser.getPrice());
 
         // if the last charge and next charge is equal null meaning the user is not yet
-        // dedecuted to the membership
+        // deducted to the membership
 
         BigDecimal userCurrentCardValue = user.getCardValue();
         BigDecimal newBalance = userCurrentCardValue.subtract(membershipPrice);
@@ -351,6 +278,124 @@ public class CustomerImpl implements CustomerService {
         user.setLastCharge(new Date());
         user.setNextCharge(nextChargeCalendar.getTime());
         logger.info("Next Charge Date -> " + nextChargeCalendar.getTime());
+    }
+
+    @Override
+    public ResponseEntity<?> updateCustomerAttendanceByFirstNameLastNameAndMiddleName(String firstName, String lastName, String middleName) {
+        Customer customer =  customerRepository.findCustomerByFirstNameLastNameAndMiddleName(firstName,lastName,middleName);
+        HashMap<String, String> result = new HashMap<>();
+
+        updateCustomerAttendance(customer,customer.getUser(), result);
+
+        return new ResponseEntity<Object>(result, HttpStatus.OK);
+    }
+
+    private void updateCustomerAttendance(Customer customer, User user, HashMap<String,String> result){
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.setTime(new Date());
+
+        // if the customer is freeze we can't time in or out
+        if(customer.getStatus() == CustomerStatus.FREEZE){
+            logger.warn("Customer is on freeze please un-freeze to continue");
+            throw new UnsupportedOperationException("Customer is on freeze please un-freeze to continue");
+        }
+
+        // if the customer has pending balance
+        if(customer.getStatus() == CustomerStatus.IN_ACTIVE){
+            logger.warn("Customer is in-active top - up to become active");
+            throw new UnsupportedOperationException("Customer is active top - up to become active");
+        }
+
+        // if the customer in our out but has pending balance
+        // then we will set the status to in active
+        if (user.getCardValue().doubleValue() < 0) {
+            customer.setStatus(CustomerStatus.IN_ACTIVE);
+            customerRepository.save(customer);
+
+            logger.info("Please settle balance of " + user.getCardValue().doubleValue()
+                    + " or top-up your account to pay the balance");
+
+            throw new UnsupportedOperationException("Please settle balance of " + user.getCardValue().doubleValue()
+                    + " and subscribe to new membership");
+        }
+
+        if (customer.getMembershipDuration() == null || (customer.getStatus() == CustomerStatus.MEMBER && currentDate.getTime().after(customer.getMembershipDuration()))){
+            customer.setStatus(CustomerStatus.NON_MEMBER);
+            customerRepository.save(customer);
+            membershipService.unEnrollMembershipCustomerByCustomerId(customer.getId());
+            membershipService.enrollCustomerById(customer.getId(),membershipService.getDefaultMembership().getId());
+        }
+
+        boolean isCustomerIsOut = customer.getIsOut();
+        String message = "Time In Successful";
+        if (isCustomerIsOut) {
+            customer.setTimeOut(new Date());
+            message = "Time Out Successful";
+        } else if (customer.getTimeIn() == null) {
+            customer.setTimeIn(new Date());
+        } else {
+            currentDate = Calendar.getInstance();
+            Calendar customerDate = Calendar.getInstance();
+            customerDate.setTime(customer.getTimeIn());
+
+            if (currentDate.get(Calendar.YEAR) == customerDate.get(Calendar.YEAR)
+                    && currentDate.get(Calendar.MONTH) == customerDate.get(Calendar.MONTH)
+                    && currentDate.get(Calendar.DAY_OF_MONTH) == customerDate.get(Calendar.DAY_OF_MONTH)) {
+                customer.setTimeIn(new Date());
+            } else {
+                Set<CustomerAttendance> customerAttendance = customer.getCustomerAttendance();
+                customerAttendance.add(CustomerAttendance.builder()
+                        .customer(customer)
+                        .timeIn(customer.getTimeIn())
+                        .timeOut(customer.getTimeOut())
+                        .build());
+                customer.setTimeIn(new Date());
+                customer.setTimeOut(null);
+                customer.setCustomerAttendance(customerAttendance);
+            }
+        }
+
+        customer.setIsOut(!isCustomerIsOut);
+
+        String fullName = user.getFirstName() + " " + user.getLastName();
+
+        customerRepository.save(customer);
+        result.put("message", message);
+        result.put("user", fullName);
+
+        deductCustomerSubscription(user);
+    }
+
+    private void topUp(User user, User assignedUser, double amount){
+        BigDecimal topUpAMount = BigDecimal.valueOf(amount);
+        BigDecimal newCardValue = user.getCardValue().add(topUpAMount);
+
+        Store store = user.getStore();
+
+        user.setCardValue(newCardValue);
+
+        BigDecimal pointsEarned = topUpAMount.divide(store.getAmountNeedToEarnOnePoint(),2, RoundingMode.DOWN);
+        BigDecimal totalPoints = pointsEarned.add(user.getPointsAmount());
+
+        user.setPointsAmount(totalPoints);
+
+        userRepository.save(user);
+        storeService.insertSale(store, topUpAMount, new Date());
+
+        // TODO: change the .user to the current login user
+
+        String assignUser = assignedUser.getLastName().toUpperCase() + ", " + assignedUser.getFirstName();
+        String appliedUser = user.getLastName().toUpperCase() + ", " + user.getFirstName();
+
+        AuditTrail auditTrail = AuditTrail
+                .builder()
+                .message(assignUser + " Top up to customer " + appliedUser + " value of " + topUpAMount)
+                .customer(user)
+                .user(assignedUser)
+                .action(Action.TOP_UP)
+                .build();
+
+        auditTrailService.save(auditTrail);
     }
 
 }

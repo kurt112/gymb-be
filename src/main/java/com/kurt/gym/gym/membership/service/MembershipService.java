@@ -7,10 +7,17 @@ import com.kurt.gym.helper.service.BaseService;
 
 public interface MembershipService extends BaseService<Membership> {
 
-    ResponseEntity<?> getMembershipMembers(long membershipId, String search, int size, int page);
+    ResponseEntity<?> getMembershipMembers(Long membershipId, String search, int size, int page);
 
-    ResponseEntity<?> enrollCustomer(String rfId, long membershipId);
+    ResponseEntity<?> enrollCustomer(String rfId, Long membershipId);
 
-    ResponseEntity<?> unEnrollMembershipCustomer(String rfId);
+    ResponseEntity<?> enrollCustomerById(Long customerId, Long membershipId);
+
+    ResponseEntity<?> unEnrollMembershipCustomerByRfId(String rfId);
+
+    ResponseEntity<?> unEnrollMembershipCustomerByCustomerId(Long customerId);
+
+
+    Membership getDefaultMembership();
 
 }
