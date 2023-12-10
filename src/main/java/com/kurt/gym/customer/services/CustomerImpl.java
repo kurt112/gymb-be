@@ -60,7 +60,7 @@ public class CustomerImpl implements CustomerService {
     @CachePut(cacheNames = { "customer" }, key = "#t.id")
     @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true)
     public ResponseEntity<Customer> save(Customer t) {
-        t.getUser().activate();
+        t.getUser().activate(storeService.getDefaultStore());
         t.getUser().setRole(UserRole.CUSTOMER);
         customerRepository.saveAndFlush(t);
 

@@ -134,4 +134,10 @@ public class StoreServiceImpl implements StoreService {
 
     }
 
+    @Override
+    @Cacheable(value = "default_store")
+    public Store getDefaultStore() {
+        return storeRepository.getReferenceById(1L);
+    }
+
 }

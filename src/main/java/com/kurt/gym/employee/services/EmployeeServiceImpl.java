@@ -2,6 +2,7 @@ package com.kurt.gym.employee.services;
 
 import java.util.HashMap;
 
+import com.kurt.gym.gym.store.service.StoreService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final StoreService storeService;
 
     @Override
     @Caching(evict = {
@@ -30,7 +32,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             @CacheEvict(cacheNames = { "employee" }, key = "#t.id")
     })
     public ResponseEntity<Employee> save(Employee t) {
-        t.getUser().activate();
+        t.getUser().activate(storeService.getDefaultStore());
         employeeRepository.save(t);
 
         return new ResponseEntity<>(

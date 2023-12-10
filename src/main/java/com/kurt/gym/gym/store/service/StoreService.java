@@ -14,4 +14,6 @@ public interface StoreService extends BaseService<Store>{
     void insertSale(Store store, BigDecimal value, Date date);
 
     ResponseEntity<?> dashboard(Long id);
+
+    Store getDefaultStore();
 }

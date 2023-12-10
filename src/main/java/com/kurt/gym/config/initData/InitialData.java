@@ -6,6 +6,8 @@ import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.employee.services.EmployeeRepository;
 import com.kurt.gym.gym.membership.model.Membership;
 import com.kurt.gym.gym.membership.service.MembershipRepository;
+import com.kurt.gym.gym.store.model.Store;
+import com.kurt.gym.gym.store.service.StoreRepository;
 import com.kurt.gym.helper.Charges;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,15 +25,18 @@ public class InitialData {
 
     private final MembershipRepository membershipRepository;
     private final EmployeeRepository employeeRepository;
+    private final StoreRepository storeRepository;
     private final Logger logger = LoggerFactory.getLogger(InitialData.class);
+
     @PostConstruct
-    public void createInitialData(){
+    public void createInitialData() {
 
         logger.info("Creating Initial Data -----------------------------------------------------");
         final Membership default_membership = membershipRepository.findById(1L).orElse(null);
         final Employee default_employee_admin = employeeRepository.findById(1L).orElse(null);
+        final Store default_store = storeRepository.findById(1L).orElse(null);
 
-        if(default_membership == null){
+        if (default_membership == null) {
             Calendar promoExpiration = Calendar.getInstance();
             promoExpiration.add(Calendar.YEAR, 999);
             Membership systemDefaultMembership = Membership
@@ -40,9 +45,9 @@ public class InitialData {
                     .name("DEFAULT_MEMBERSHIP")
                     .code("DEFAULT")
                     .price(10)
-                    .week((short)9)
-                    .year((short)9)
-                    .month((short)9)
+                    .week((short) 9)
+                    .year((short) 9)
+                    .month((short) 9)
                     .duration(99999999L)
                     .membershipPromoExpiration(promoExpiration.getTime())
                     .durationDescription("This Membership is the default charges when you are not member")
@@ -51,7 +56,7 @@ public class InitialData {
             membershipRepository.save(systemDefaultMembership);
         }
 
-        if(default_employee_admin == null){
+        if (default_employee_admin == null) {
             // don't delete the data create this is the backbone of the application to run
             User systemInitialAdmin = User
                     .builder()
@@ -73,6 +78,19 @@ public class InitialData {
                     .build();
 
             employeeRepository.save(systemDefaultEmployee);
+        }
+
+        if (default_store == null) {
+            Store store = Store
+                    .builder()
+                    .id(1L)
+                    .name("Default_Store")
+                    .totalSales(new BigDecimal(0))
+                    .email("kurtorioque112@gmail.com")
+                    .amountNeedToEarnOnePoint(new BigDecimal(30))
+                    .build();
+
+            storeRepository.save(store);
         }
 
         logger.info("Done Create Initial Data -----------------------------------------------------");

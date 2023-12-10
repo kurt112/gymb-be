@@ -142,11 +142,12 @@ public class User implements Comparable<User> {
         return this.id == tempUser.id;
     }
 
-    public void activate() {
+    public void activate(Store store) {
         this.isEnabled = true;
         this.isAccountNotExpired = true;
         this.isAccountNotLocked = true;
         this.isCredentialNotExpired = true;
+        this.setStore(store);
     }
 
     public void forEmailVerification(){
