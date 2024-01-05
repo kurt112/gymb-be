@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kurt.gym.gym.membership.model.Membership;
-import com.kurt.gym.gym.membership.service.MembershipService;
+import com.kurt.gym.core.persistence.entity.Membership;
+import com.kurt.gym.core.services.MembershipService;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Objects;
 
 @RequestMapping("gym/memberships")
 @RestController
@@ -55,10 +57,10 @@ public class MembershipController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMembership(@PathVariable Long id, @RequestBody Membership membership) {
-        if (membership.getId() != id)
+        if (!Objects.equals(membership.getId(), id))
             ApiMessage.errorResponse("Id Not Match To Body");
 
-        if (membershipService.referencedById(id) == null)
+        if (membershipService.findOne(id) == null)
             return ApiMessage.errorResponse("Can't find membership Data");
 
         return membershipService.save(membership);

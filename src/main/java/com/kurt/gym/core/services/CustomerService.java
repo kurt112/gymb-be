@@ -1,10 +1,10 @@
-package com.kurt.gym.core.service;
+package com.kurt.gym.core.services;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kurt.gym.auth.model.user.User;
-import com.kurt.gym.customer.model.Customer;
+import com.kurt.gym.core.persistence.entity.Customer;
 import com.kurt.gym.helper.service.BaseService;
 
 @Service

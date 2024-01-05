@@ -1,5 +1,7 @@
-package com.kurt.gym.gym.membership.service;
+package com.kurt.gym.core.serviceImpl;
 
+import com.kurt.gym.core.persistence.repository.MembershipWithUserRepository;
+import com.kurt.gym.core.services.MembershipWithUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

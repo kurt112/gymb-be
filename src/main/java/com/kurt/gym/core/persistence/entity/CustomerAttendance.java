@@ -1,7 +1,8 @@
-package com.kurt.gym.customer.model;
+package com.kurt.gym.core.persistence.entity;
 
 import java.util.Date;
 
+import com.kurt.gym.core.persistence.entity.Customer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

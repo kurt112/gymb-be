@@ -1,9 +1,8 @@
-package com.kurt.gym.gym.membership.model;
+package com.kurt.gym.core.persistence.entity;
 
 import java.util.Date;
 import java.util.List;
 
-import com.kurt.gym.auth.model.user.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

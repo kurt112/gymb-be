@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kurt.gym.gym.classes.model.GymClass;
-import com.kurt.gym.gym.classes.model.GymClassType;
-import com.kurt.gym.gym.classes.service.GymClass.GymClassService;
-import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserService;
+import com.kurt.gym.core.persistence.entity.GymClass;
+import com.kurt.gym.core.persistence.entity.GymClassType;
+import com.kurt.gym.core.services.GymClassService;
+import com.kurt.gym.core.services.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
 import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;

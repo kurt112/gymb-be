@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.store.service;
+package com.kurt.gym.core.services;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -7,7 +7,7 @@ import java.util.HashMap;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kurt.gym.gym.store.model.Store;
+import com.kurt.gym.core.persistence.entity.Store;
 import com.kurt.gym.helper.service.BaseService;
 
 @Service

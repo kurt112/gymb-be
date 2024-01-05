@@ -1,10 +1,10 @@
-package com.kurt.gym.gym.store.service;
+package com.kurt.gym.core.persistence.repository;
 
 import java.util.Date;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.kurt.gym.gym.store.model.StoreSale;
+import com.kurt.gym.core.persistence.entity.StoreSale;
 import org.springframework.data.jpa.repository.Query;
 
 public interface StoreSaleRepository extends JpaRepository<StoreSale, Long>{

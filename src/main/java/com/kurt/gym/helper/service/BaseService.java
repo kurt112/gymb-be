@@ -16,6 +16,4 @@ public interface BaseService<T>{
     ResponseEntity<?> deleteById(Long id);
 
     ResponseEntity<?> findOne(Long id);
-
-    T referencedById(Long id);
 }

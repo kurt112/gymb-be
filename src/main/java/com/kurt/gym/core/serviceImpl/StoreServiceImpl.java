@@ -1,10 +1,12 @@
-package com.kurt.gym.gym.store.service;
+package com.kurt.gym.core.serviceImpl;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.kurt.gym.core.persistence.repository.*;
+import com.kurt.gym.core.services.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -14,11 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kurt.gym.core.persistence.repository.CustomerRepository;
-import com.kurt.gym.core.persistence.repository.EmployeeRepository;
-import com.kurt.gym.core.persistence.repository.GymClassRepository;
-import com.kurt.gym.gym.store.model.Store;
-import com.kurt.gym.gym.store.model.StoreSale;
+import com.kurt.gym.core.persistence.entity.Store;
+import com.kurt.gym.core.persistence.entity.StoreSale;
 import com.kurt.gym.helper.service.ApiMessage;
 import com.kurt.gym.schedule.service.ScheduleRepository;
 

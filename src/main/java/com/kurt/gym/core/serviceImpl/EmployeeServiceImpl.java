@@ -1,9 +1,10 @@
-package com.kurt.gym.employee.services;
+package com.kurt.gym.core.serviceImpl;
 
 import java.util.HashMap;
 
 import com.kurt.gym.core.rest.api.util.EmployeeUtil;
-import com.kurt.gym.gym.store.service.StoreService;
+import com.kurt.gym.core.services.EmployeeService;
+import com.kurt.gym.core.services.StoreService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -14,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kurt.gym.employee.model.Employee;
+import com.kurt.gym.core.persistence.entity.Employee;
 import com.kurt.gym.helper.model.AutoComplete;
 import com.kurt.gym.helper.service.ApiMessage;
 

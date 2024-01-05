@@ -1,4 +1,4 @@
-package com.kurt.gym.customer.model;
+package com.kurt.gym.core.persistence.entity;
 
 
 public enum CustomerStatus {

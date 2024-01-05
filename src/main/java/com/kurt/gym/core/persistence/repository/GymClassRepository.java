@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.classes.service.GymClass;
+package com.kurt.gym.core.persistence.repository;
 
 import org.springframework.data.domain.Pageable;
 

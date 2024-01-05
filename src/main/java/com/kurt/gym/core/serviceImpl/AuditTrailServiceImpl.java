@@ -1,8 +1,10 @@
-package com.kurt.gym.gym.audit.service;
+package com.kurt.gym.core.serviceImpl;
 
 import java.util.Calendar;
 import java.util.Date;
 
+import com.kurt.gym.core.persistence.repository.AuditTrailRepoisitory;
+import com.kurt.gym.core.services.AuditTrailService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kurt.gym.gym.audit.model.AuditTrail;
+import com.kurt.gym.core.persistence.entity.AuditTrail;
 import com.kurt.gym.helper.service.ApiMessage;
 
 import lombok.RequiredArgsConstructor;

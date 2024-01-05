@@ -1,11 +1,11 @@
-package com.kurt.gym.gym.audit.service;
+package com.kurt.gym.core.services;
 
 import java.util.Date;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kurt.gym.gym.audit.model.AuditTrail;
+import com.kurt.gym.core.persistence.entity.AuditTrail;
 import com.kurt.gym.helper.service.BaseService;
 
 @Service

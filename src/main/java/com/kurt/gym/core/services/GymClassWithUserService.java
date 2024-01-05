@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.classes.service.gymClassWithUser;
+package com.kurt.gym.core.services;
 
 import com.kurt.gym.core.persistence.entity.GymClassWithUser;
 import com.kurt.gym.helper.service.BaseService;

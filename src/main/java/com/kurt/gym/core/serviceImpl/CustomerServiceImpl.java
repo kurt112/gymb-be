@@ -3,17 +3,12 @@ package com.kurt.gym.core.serviceImpl;
 import com.kurt.gym.auth.model.services.user.UserRepository;
 import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.auth.model.user.UserRole;
-import com.kurt.gym.core.rest.api.util.CustomerUtil;
-import com.kurt.gym.core.services.CustomerService;
-import com.kurt.gym.core.persistence.entity.Customer;
-import com.kurt.gym.core.persistence.entity.CustomerAttendance;
-import com.kurt.gym.core.persistence.entity.CustomerStatus;
-import com.kurt.gym.core.persistence.entity.AuditTrail;
-import com.kurt.gym.core.services.AuditTrailService;
-import com.kurt.gym.core.persistence.entity.MembershipWithUser;
-import com.kurt.gym.core.services.MembershipService;
+import com.kurt.gym.core.persistence.entity.*;
 import com.kurt.gym.core.persistence.repository.MembershipWithUserRepository;
-import com.kurt.gym.core.persistence.entity.Store;
+import com.kurt.gym.core.rest.api.util.CustomerUtil;
+import com.kurt.gym.core.services.AuditTrailService;
+import com.kurt.gym.core.services.CustomerService;
+import com.kurt.gym.core.services.MembershipService;
 import com.kurt.gym.core.services.StoreService;
 import com.kurt.gym.helper.Action;
 import com.kurt.gym.helper.Charges;
@@ -23,9 +18,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +35,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class CustomerImpl implements CustomerService {
+public class CustomerServiceImpl implements CustomerService {
     private final UserRepository userRepository;
     private final StoreService storeService;
     private final AuditTrailService auditTrailService;
@@ -51,10 +43,9 @@ public class CustomerImpl implements CustomerService {
     private final MembershipService membershipService;
     private final Jwt jwt;
 
-    private final Logger logger = LoggerFactory.getLogger(CustomerImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
 
     @Override
-    @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true)
     public ResponseEntity<Customer> save(Customer t) {
         t.getUser().activate(storeService.getDefaultStore());
         t.getUser().setRole(UserRole.CUSTOMER);
@@ -73,17 +64,12 @@ public class CustomerImpl implements CustomerService {
         if (fromDb == null)
             return ApiMessage.errorResponse("No customer found");
 
-        CustomerUtil.deleteById(t.getId());
+        CustomerUtil.delete(t);
 
         return ApiMessage.successResponse("Customer deleted successfully");
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(cacheNames = { "customer" }, key = "#id"),
-            @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true),
-            @CacheEvict(cacheNames = { "customer-reference-rfId" }, allEntries = true)
-    })
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
         Customer fromDb = CustomerUtil.findById(id);
@@ -97,7 +83,6 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
-    @Cacheable(value = "customers-table-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Customer> customers = CustomerUtil.findAllByOrderByCreatedAtDesc(search, pageable);
@@ -105,7 +90,6 @@ public class CustomerImpl implements CustomerService {
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
-    @Cacheable(cacheNames = "customer", key = "#id")
     public ResponseEntity<?> findOne(Long id) {
         Customer fromDb = CustomerUtil.findById(id);
 
@@ -170,7 +154,6 @@ public class CustomerImpl implements CustomerService {
     }
 
     @Override
-    @Cacheable(value = "customer-reference-rfId", key = "#rfId")
     public ResponseEntity<?> getUserIdByCustomerRfId(String rfId) {
 
         Long customerId = CustomerUtil.findCustomerIdByRfID(rfId);

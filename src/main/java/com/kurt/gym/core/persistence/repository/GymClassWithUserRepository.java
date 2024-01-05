@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.classes.service.gymClassWithUser;
+package com.kurt.gym.core.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import jakarta.transaction.Transactional;
 
 @Transactional
-public interface GymClassWithUserRepositoy extends JpaRepository<GymClassWithUser, Long> {
+public interface GymClassWithUserRepository extends JpaRepository<GymClassWithUser, Long> {
     @Query("select new com.kurt.gym.core.persistence.entity.GymClassWithUser(e.currentEnroll, e.session, e.dateStart) from GymClassWithUser e where e.gymClass.id = ?1")
     Page<GymClassWithUser> getGymClassMembers(Long gymClassId, Pageable pageable);
 

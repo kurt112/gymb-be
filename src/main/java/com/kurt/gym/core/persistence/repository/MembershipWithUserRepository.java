@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.membership.service;
+package com.kurt.gym.core.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

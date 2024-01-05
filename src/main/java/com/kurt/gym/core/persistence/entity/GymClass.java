@@ -1,12 +1,10 @@
-package com.kurt.gym.gym.classes.model;
+package com.kurt.gym.core.persistence.entity;
 
 import java.util.Date;
 import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kurt.gym.employee.model.Employee;
 import com.kurt.gym.schedule.model.Schedule;
 
 import jakarta.persistence.CascadeType;

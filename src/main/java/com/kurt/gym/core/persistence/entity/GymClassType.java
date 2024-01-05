@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.classes.model;
+package com.kurt.gym.core.persistence.entity;
 
 import java.util.Date;
 import java.util.List;

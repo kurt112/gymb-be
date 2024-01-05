@@ -1,4 +1,4 @@
-package com.kurt.gym.employee.api;
+package com.kurt.gym.employee.contoller;
 
 import com.kurt.gym.core.rest.api.util.EmployeeUtil;
 import org.springframework.http.ResponseEntity;

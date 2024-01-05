@@ -1,10 +1,12 @@
-package com.kurt.gym.gym.classes.service.gymClassWithUser;
+package com.kurt.gym.core.serviceImpl;
 
+import com.kurt.gym.core.persistence.repository.GymClassWithUserRepository;
+import com.kurt.gym.core.services.GymClassWithUserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kurt.gym.core.persistence.entity.GymClassWithUser;
-import com.kurt.gym.gym.classes.service.GymClass.GymClassRepository;
+import com.kurt.gym.core.persistence.repository.GymClassRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GymClassWithUserServiceImpl implements GymClassWithUserService {
 
-    private final GymClassWithUserRepositoy gymClassWithUserRepositoy;
+    private final GymClassWithUserRepository gymClassWithUserRepository;
     private final GymClassRepository gymClassRepository;
 
     @Override

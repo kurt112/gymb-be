@@ -2,12 +2,12 @@ package com.kurt.gym.config.initData;
 
 import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.auth.model.user.UserRole;
-import com.kurt.gym.employee.model.Employee;
-import com.kurt.gym.employee.services.EmployeeRepository;
-import com.kurt.gym.gym.membership.model.Membership;
-import com.kurt.gym.gym.membership.service.MembershipRepository;
-import com.kurt.gym.gym.store.model.Store;
-import com.kurt.gym.gym.store.service.StoreRepository;
+import com.kurt.gym.core.persistence.entity.Employee;
+import com.kurt.gym.core.persistence.repository.EmployeeRepository;
+import com.kurt.gym.core.persistence.entity.Membership;
+import com.kurt.gym.core.persistence.repository.MembershipRepository;
+import com.kurt.gym.core.persistence.entity.Store;
+import com.kurt.gym.core.persistence.repository.StoreRepository;
 import com.kurt.gym.helper.Charges;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

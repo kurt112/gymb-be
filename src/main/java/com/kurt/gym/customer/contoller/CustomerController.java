@@ -1,4 +1,4 @@
-package com.kurt.gym.customer.api;
+package com.kurt.gym.customer.contoller;
 
 import com.kurt.gym.core.rest.api.util.CustomerUtil;
 import org.springframework.http.ResponseEntity;

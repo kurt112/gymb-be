@@ -1,18 +1,16 @@
 package com.kurt.gym.gym.store.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
 
-import com.kurt.gym.gym.store.model.Store;
-import com.kurt.gym.gym.store.service.StoreService;
+import com.kurt.gym.core.persistence.entity.Store;
+import com.kurt.gym.core.services.StoreService;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("gym")
@@ -35,5 +33,11 @@ public class StoreController {
     public ResponseEntity<?> getStoreDashboard(@PathVariable long id) {
         return storeService.dashboard(id);
     }
+
+    @GetMapping("/{id}/dashboard/date-sale/{date}")
+    public ResponseEntity<?> getStoreDateSale(@PathVariable Long id,@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        return storeService.getDateSale(id, date);
+    }
+
 
 }

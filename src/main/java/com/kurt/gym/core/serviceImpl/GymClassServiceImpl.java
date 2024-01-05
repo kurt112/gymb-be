@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.classes.service.GymClass;
+package com.kurt.gym.core.serviceImpl;
 
 import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.core.persistence.entity.Customer;
@@ -8,7 +8,10 @@ import com.kurt.gym.core.persistence.repository.EmployeeRepository;
 import com.kurt.gym.core.persistence.entity.GymClass;
 import com.kurt.gym.core.persistence.entity.GymClassType;
 import com.kurt.gym.core.persistence.entity.GymClassWithUser;
-import com.kurt.gym.gym.classes.service.gymClassWithUser.GymClassWithUserRepositoy;
+import com.kurt.gym.core.services.GymClassService;
+import com.kurt.gym.core.persistence.repository.GymClassRepository;
+import com.kurt.gym.core.persistence.repository.GymClassTypeRepository;
+import com.kurt.gym.core.persistence.repository.GymClassWithUserRepository;
 import com.kurt.gym.helper.service.ApiMessage;
 import com.kurt.gym.schedule.model.Schedule;
 import com.kurt.gym.schedule.model.ScheduleData;
@@ -35,7 +38,7 @@ import java.util.*;
 public class GymClassServiceImpl implements GymClassService {
 
     private final GymClassRepository gymClassRepository;
-    private final GymClassWithUserRepositoy gymClassWithUserRepositoy;
+    private final GymClassWithUserRepository gymClassWithUserRepository;
     private final CustomerRepository customerRepository;
     private final ScheduleRepository scheduleRepository;
     private final EmployeeRepository employeeRepository;
@@ -138,7 +141,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Cacheable(value = "gym-class-members", key = "#gymClassId")
     public ResponseEntity<?> getGymClassMembers(long gymClassId, String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GymClassWithUser> gymClassWithUser = gymClassWithUserRepositoy.getGymClassMembers(gymClassId, pageable);
+        Page<GymClassWithUser> gymClassWithUser = gymClassWithUserRepository.getGymClassMembers(gymClassId, pageable);
 
         return new ResponseEntity<>(gymClassWithUser, HttpStatus.OK);
     }
@@ -167,7 +170,7 @@ public class GymClassServiceImpl implements GymClassService {
             return ApiMessage.errorResponse("Customer is not subscribed to any membership");
         }
 
-        Long gymClassWithUserId = gymClassWithUserRepositoy.getGymClassWithUser(gymClassId, customer.getUser().getId());
+        Long gymClassWithUserId = gymClassWithUserRepository.getGymClassWithUser(gymClassId, customer.getUser().getId());
 
         if (gymClassWithUserId != null) {
             return ApiMessage.errorResponse("Customer already enrolled in this class");
@@ -181,7 +184,7 @@ public class GymClassServiceImpl implements GymClassService {
                 .isActive(true)
                 .build();
 
-        gymClassWithUserRepositoy.save(gymClassWithUser);
+        gymClassWithUserRepository.save(gymClassWithUser);
 
         return ApiMessage.successResponse("Customer successfully enrolled");
     }
@@ -200,16 +203,16 @@ public class GymClassServiceImpl implements GymClassService {
 
         Customer customer = customerRepository.getReferenceById(customerId);
 
-        Long gymClassWithUserId = gymClassWithUserRepositoy.getGymClassWithUser(gymClassId, customer.getUser().getId());
+        Long gymClassWithUserId = gymClassWithUserRepository.getGymClassWithUser(gymClassId, customer.getUser().getId());
 
         if (gymClassWithUserId == null)
             return ApiMessage.errorResponse("Customer not currently enrolled in this class");
 
-        GymClassWithUser gymClassWithUser = gymClassWithUserRepositoy.getReferenceById(gymClassWithUserId);
+        GymClassWithUser gymClassWithUser = gymClassWithUserRepository.getReferenceById(gymClassWithUserId);
 
         gymClassWithUser.setIsActive(false);
 
-        gymClassWithUserRepositoy.save(gymClassWithUser);
+        gymClassWithUserRepository.save(gymClassWithUser);
 
         return ApiMessage.successResponse("Customer successfully remove from this class");
     }

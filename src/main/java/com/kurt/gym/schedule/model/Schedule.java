@@ -5,14 +5,13 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kurt.gym.employee.model.Employee;
-import com.kurt.gym.gym.classes.model.GymClass;
+import com.kurt.gym.core.persistence.entity.Employee;
+import com.kurt.gym.core.persistence.entity.GymClass;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

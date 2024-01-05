@@ -1,7 +1,7 @@
-package com.kurt.gym.gym.store.service;
+package com.kurt.gym.core.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.kurt.gym.gym.store.model.Store;
+import com.kurt.gym.core.persistence.entity.Store;
 import jakarta.transaction.Transactional;
 
 @Transactional

@@ -1,10 +1,12 @@
-package com.kurt.gym.gym.membership.service;
+package com.kurt.gym.core.serviceImpl;
 
+import com.kurt.gym.core.persistence.repository.MembershipWithUserRepository;
 import com.kurt.gym.core.rest.api.util.CustomerUtil;
 import com.kurt.gym.core.rest.api.util.MembershipUtil;
 import com.kurt.gym.core.persistence.entity.Customer;
 import com.kurt.gym.core.persistence.entity.Membership;
 import com.kurt.gym.core.persistence.entity.MembershipWithUser;
+import com.kurt.gym.core.services.MembershipService;
 import com.kurt.gym.helper.Charges;
 import com.kurt.gym.helper.service.ApiMessage;
 import jakarta.transaction.Transactional;

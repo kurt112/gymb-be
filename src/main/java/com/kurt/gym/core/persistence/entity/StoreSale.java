@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.store.model;
+package com.kurt.gym.core.persistence.entity;
 
 import java.math.BigDecimal;
 import java.util.Date;

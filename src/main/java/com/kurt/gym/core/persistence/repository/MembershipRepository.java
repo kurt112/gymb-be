@@ -1,4 +1,4 @@
-package com.kurt.gym.gym.membership.service;
+package com.kurt.gym.core.persistence.repository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
