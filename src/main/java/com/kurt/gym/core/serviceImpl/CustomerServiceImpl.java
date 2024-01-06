@@ -6,6 +6,7 @@ import com.kurt.gym.auth.model.user.UserRole;
 import com.kurt.gym.core.persistence.entity.*;
 import com.kurt.gym.core.persistence.repository.MembershipWithUserRepository;
 import com.kurt.gym.core.rest.api.util.CustomerUtil;
+import com.kurt.gym.core.rest.api.util.StoreUtil;
 import com.kurt.gym.core.services.AuditTrailService;
 import com.kurt.gym.core.services.CustomerService;
 import com.kurt.gym.core.services.MembershipService;
@@ -37,7 +38,6 @@ import java.util.Set;
 @Service
 public class CustomerServiceImpl implements CustomerService {
     private final UserRepository userRepository;
-    private final StoreService storeService;
     private final AuditTrailService auditTrailService;
     private final MembershipWithUserRepository membershipWithUserRepository;
     private final MembershipService membershipService;
@@ -47,7 +47,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ResponseEntity<Customer> save(Customer t) {
-        t.getUser().activate(storeService.getDefaultStore());
+        t.getUser().activate(StoreUtil.getDefaultStore());
         t.getUser().setRole(UserRole.CUSTOMER);
         CustomerUtil.save(t);
 
@@ -349,7 +349,7 @@ public class CustomerServiceImpl implements CustomerService {
         user.setPointsAmount(totalPoints);
 
         userRepository.save(user);
-        storeService.insertSale(store, topUpAMount, new Date());
+        StoreUtil.insertSale(store, topUpAMount, new Date());
 
         // TODO: change the .user to the current login user
 

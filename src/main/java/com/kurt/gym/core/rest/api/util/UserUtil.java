@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 public class UserUtil {
     private static UserRepository userRepository;
 
-    public static void initRepositories(UserRepository userRepository){
+    public static void initRepositories(UserRepository userRepository) {
         UserUtil.userRepository = userRepository;
     }
 
-    private UserUtil(){
-
+    UserUtil() {
     }
+
 }

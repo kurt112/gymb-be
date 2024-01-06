@@ -5,18 +5,16 @@ import com.kurt.gym.core.persistence.entity.MembershipWithUser;
 import com.kurt.gym.core.persistence.repository.MembershipRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
-public class MembershipUtil {
+@Service
+public final class MembershipUtil {
 
     private static MembershipRepository membershipRepository;
-
     public static void initRepositories(MembershipRepository membershipRepository){
             MembershipUtil.membershipRepository = membershipRepository;
     }
-
-    private MembershipUtil(){}
+    MembershipUtil(){}
 
     public static void save(Membership membership) {
         membershipRepository.saveAndFlush(membership);

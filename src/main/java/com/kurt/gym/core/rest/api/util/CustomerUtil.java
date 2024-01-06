@@ -1,7 +1,7 @@
 package com.kurt.gym.core.rest.api.util;
 
-import com.kurt.gym.core.persistence.repository.CustomerRepository;
 import com.kurt.gym.core.persistence.entity.Customer;
+import com.kurt.gym.core.persistence.repository.CustomerRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -11,12 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CustomerUtil{
+public  class CustomerUtil{
     private static CustomerRepository customerRepository;
-
-    private CustomerUtil() {
-
-    }
+    CustomerUtil (){}
 
     public static void initRepositories(CustomerRepository customerRepository) {
         CustomerUtil.customerRepository = customerRepository;
@@ -56,6 +53,7 @@ public class CustomerUtil{
     public static void delete(Customer customer){
         customerRepository.delete(customer);
     }
+
     @Cacheable(value = "customers-table-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public static Page<Customer> findAllByOrderByCreatedAtDesc(String search, Pageable pageable){
         return customerRepository.findAllByOrderByCreatedAtDesc(search, pageable);
@@ -72,6 +70,10 @@ public class CustomerUtil{
 
     public static Customer findCustomerByFirstNameLastNameAndMiddleName(String firstName, String lastName, String middleName){
         return customerRepository.findCustomerByFirstNameLastNameAndMiddleName(firstName,lastName,middleName);
+    }
+
+    public static Long countCustomer(){
+        return customerRepository.count();
     }
 
 }
