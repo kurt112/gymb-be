@@ -1,7 +1,7 @@
 package com.kurt.gym.core.persistence.entity;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -93,6 +93,7 @@ public class GymClass {
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
         this.instructorName = instructorName;
+        this.schedules = new ArrayList<>();
     }
 
     @PrePersist

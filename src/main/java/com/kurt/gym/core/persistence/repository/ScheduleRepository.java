@@ -30,6 +30,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     void updateTime(@Param(value = "startTime") Date startTime, @Param(value = "endTime") Date endTime,
             @Param(value = "scheduleId") Long scheduleId);
 
-    @Query(value = "SELECT t from Schedule t where DATE(t.startTime) = ?1")
-    Set<Schedule> getScheduleTargetDate(Date date);
+    @Query(value = "SELECT * from Schedule where CAST(start_time As Date) = ?1", nativeQuery = true)
+    Set<Schedule> getScheduleTargetDate(String yyyyMMddDate);
 }

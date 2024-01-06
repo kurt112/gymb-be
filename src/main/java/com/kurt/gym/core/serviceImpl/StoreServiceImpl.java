@@ -1,12 +1,11 @@
 package com.kurt.gym.core.serviceImpl;
 
+import com.kurt.gym.core.persistence.entity.GymClass;
+import com.kurt.gym.core.persistence.entity.GymClassType;
 import com.kurt.gym.core.persistence.entity.Schedule;
 import com.kurt.gym.core.persistence.entity.Store;
 import com.kurt.gym.core.persistence.repository.GymClassRepository;
-import com.kurt.gym.core.rest.api.util.CustomerUtil;
-import com.kurt.gym.core.rest.api.util.EmployeeUtil;
-import com.kurt.gym.core.rest.api.util.ScheduleUtil;
-import com.kurt.gym.core.rest.api.util.StoreUtil;
+import com.kurt.gym.core.rest.api.util.*;
 import com.kurt.gym.core.services.StoreService;
 import com.kurt.gym.helper.service.ApiMessage;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +20,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -120,11 +119,21 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public ResponseEntity<?> getTodaySchedules() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDateTime = now.format(formatter);
 
+        logger.info("======================== Getting Today Schedule ==================");
+        logger.info(formattedDateTime);
+        Set<Schedule> todaySchedule = ScheduleUtil.getScheduleTargetDate(formattedDateTime);
 
-        Set<Schedule> todaySchedule = ScheduleUtil.getScheduleTargetDate(new Date());
+        List<GymClass> gymClasses = todaySchedule.stream().map(e -> {
+            GymClass gymClass = GymClassUtil.getGymClassWithoutSchedules(e.getGymClass().getId());
+            gymClass.getSchedules().add(e);
+            return gymClass;
+        }).collect(Collectors.toList());
 
-        return new ResponseEntity<>(todaySchedule, HttpStatus.OK);
+        return new ResponseEntity<>(gymClasses, HttpStatus.OK);
     }
 
 }

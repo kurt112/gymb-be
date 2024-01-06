@@ -23,4 +23,9 @@ public interface GymClassRepository extends JpaRepository<GymClass, Long> {
 
     @Query("select e from GymClass e where e.isActive = true")
     List<GymClass> getGymClassesSchedule();
+
+
+    @Query("select new com.kurt.gym.core.persistence.entity.GymClass(e.id, e.name, e.gymClassType, e.dateStart, e.dateEnd, e.instructorName) " +
+            "from GymClass e where e.id = ?1")
+    GymClass getGymClassByIdWithoutSchedules(Long id);
 }

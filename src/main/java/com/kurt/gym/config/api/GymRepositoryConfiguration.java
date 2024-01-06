@@ -20,6 +20,7 @@ public class GymRepositoryConfiguration {
     private final StoreRepository storeRepository;
     private final StoreSaleRepository storeSaleRepository;
     private final ScheduleRepository scheduleRepository;
+    private final GymClassRepository gymClassRepository;
     @PostConstruct
     public void initRepository(){
         MembershipUtil.initRepositories(this.membershipRepository);
@@ -28,5 +29,6 @@ public class GymRepositoryConfiguration {
         CustomerUtil.initRepositories(this.customerRepository);
         StoreUtil.initRepositories(this.storeRepository, this.storeSaleRepository);
         ScheduleUtil.initRepositories(this.scheduleRepository);
+        GymClassUtil.initRepositories(this.gymClassRepository);
     }
 }
