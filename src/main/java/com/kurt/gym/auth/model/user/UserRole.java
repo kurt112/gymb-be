@@ -8,12 +8,28 @@ public enum UserRole {
 
     private final int role;
 
-    UserRole(int role){
+    UserRole(int role) {
         this.role = role;
     }
 
-    public int getStatus(){
-        return  this.role;
+    public int getStatus() {
+        return this.role;
+
+    }
+
+    public static UserRole getRole(int role) {
+        switch (role) {
+            case 1:
+                return ADMIN;
+            case 2:
+                return COACH;
+            case 3:
+                return FRONT_DESK;
+            case 4:
+                return CUSTOMER;
+            default:
+                return null;
+        }
     }
 
 }

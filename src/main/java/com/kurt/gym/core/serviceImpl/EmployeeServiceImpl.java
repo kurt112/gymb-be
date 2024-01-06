@@ -1,10 +1,10 @@
 package com.kurt.gym.core.serviceImpl;
 
+import com.kurt.gym.auth.model.user.UserRole;
 import com.kurt.gym.core.persistence.entity.Employee;
 import com.kurt.gym.core.rest.api.util.EmployeeUtil;
 import com.kurt.gym.core.rest.api.util.StoreUtil;
 import com.kurt.gym.core.services.EmployeeService;
-import com.kurt.gym.core.services.StoreService;
 import com.kurt.gym.helper.model.AutoComplete;
 import com.kurt.gym.helper.service.ApiMessage;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,6 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
-
-    private final StoreService storeService;
 
     @Override
     public ResponseEntity<Employee> save(Employee t) {
@@ -81,9 +79,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public ResponseEntity<?> data(String search, String role, int size, int page) {
+    public ResponseEntity<?> data(String search, Integer role, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = EmployeeUtil.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, 1,
+        UserRole userRole = UserRole.getRole(role);
+
+        Page<Employee> employees = EmployeeUtil.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, userRole,
                 pageable);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);

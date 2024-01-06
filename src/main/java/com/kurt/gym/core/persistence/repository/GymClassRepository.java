@@ -22,5 +22,5 @@ public interface GymClassRepository extends JpaRepository<GymClass, Long> {
     Page<GymClass> getGymClassWithoutSchedules(String search,Pageable pageable);
 
     @Query("select e from GymClass e where e.isActive = true")
-    List<GymClass> getGymClassesSchedule( );
+    List<GymClass> getGymClassesSchedule();
 }

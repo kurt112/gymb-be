@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import com.kurt.gym.core.persistence.entity.GymClass;
 import com.kurt.gym.core.persistence.entity.GymClassType;
 import com.kurt.gym.helper.service.BaseService;
-import com.kurt.gym.schedule.model.Schedule;
-import com.kurt.gym.schedule.model.ScheduleData;
+import com.kurt.gym.core.persistence.entity.Schedule;
+import com.kurt.gym.core.persistence.entity.ScheduleData;
 
 @Service
 public interface GymClassService extends BaseService<GymClass> {

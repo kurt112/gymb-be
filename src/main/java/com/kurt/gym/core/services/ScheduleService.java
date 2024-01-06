@@ -1,4 +1,4 @@
-package com.kurt.gym.schedule.service;
+package com.kurt.gym.core.services;
 
 public interface ScheduleService {
     

@@ -4,6 +4,8 @@ import com.kurt.gym.core.persistence.entity.Store;
 import com.kurt.gym.core.persistence.entity.StoreSale;
 import com.kurt.gym.core.persistence.repository.StoreRepository;
 import com.kurt.gym.core.persistence.repository.StoreSaleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,7 +20,7 @@ import java.util.List;
 public class StoreUtil {
     private static StoreRepository storeRepository;
     private static StoreSaleRepository storeSaleRepository;
-
+    private static final Logger logger = LoggerFactory.getLogger(StoreUtil.class);
     StoreUtil() {
     }
 
@@ -94,6 +96,12 @@ public class StoreUtil {
 
         storeSaleRepository.saveAndFlush(storeSale);
         StoreUtil.save(store);
+    }
+
+    public static Double findSalesInStoreBetweenDate(Long storeId, Date targetDate){
+        logger.info("================================ Querying Sales ================================");
+        logger.info("The Target Date: " + targetDate.toString());
+        return storeSaleRepository.findSalesInTargetDate(storeId, targetDate);
     }
 
 

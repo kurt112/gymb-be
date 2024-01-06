@@ -1,5 +1,6 @@
 package com.kurt.gym.employee.contoller;
 
+import com.kurt.gym.auth.model.user.UserRole;
 import com.kurt.gym.core.rest.api.util.EmployeeUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,7 @@ public class EmployeeController {
             @RequestParam("page") int page,
             @RequestParam("size") int size,
             @RequestParam("search") String search,
-            @RequestParam(required = false) String role) {
+            @RequestParam(required = false) Integer role) {
                 
         if (role == null)
             return employeeService.data(search, size, page - 1);

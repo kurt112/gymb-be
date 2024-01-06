@@ -1,5 +1,6 @@
 package com.kurt.gym.core.rest.api.util;
 
+import com.kurt.gym.auth.model.user.UserRole;
 import com.kurt.gym.core.persistence.entity.Employee;
 import com.kurt.gym.core.persistence.repository.EmployeeRepository;
 import com.kurt.gym.helper.model.AutoComplete;
@@ -57,7 +58,7 @@ public class EmployeeUtil {
     }
 
     public static Long countCoach() {
-        return employeeRepository.countCoach();
+        return employeeRepository.countCoach(UserRole.COACH);
     }
 
     @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
@@ -68,8 +69,8 @@ public class EmployeeUtil {
     public static Page<AutoComplete> findEmployeeCoachBySearch(String search, Pageable pageable) {
         return employeeRepository.findEmployeeCoachBySearch(search, pageable);
     }
-    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #role, #size, #page)")
-    public static Page<Employee> findAllEmployeeWithRoleByOrderByCreatedAtDesc(String search, int role, Pageable pageable) {
+    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #role, #pageable)")
+    public static Page<Employee> findAllEmployeeWithRoleByOrderByCreatedAtDesc(String search, UserRole role, Pageable pageable) {
         return employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role, pageable);
     }
 }

@@ -10,5 +10,5 @@ import com.kurt.gym.helper.service.BaseService;
 public interface EmployeeService extends BaseService<Employee> {
     ResponseEntity<?> getEmployeeCoachAutoComplete(String search);
 
-    ResponseEntity<?> data(String search, String role, int size, int page);
+    ResponseEntity<?> data(String search, Integer role, int size, int page);
 }

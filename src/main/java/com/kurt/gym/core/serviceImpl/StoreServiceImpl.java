@@ -1,14 +1,14 @@
 package com.kurt.gym.core.serviceImpl;
 
+import com.kurt.gym.core.persistence.entity.Schedule;
 import com.kurt.gym.core.persistence.entity.Store;
-import com.kurt.gym.core.persistence.entity.StoreSale;
-import com.kurt.gym.core.persistence.repository.*;
+import com.kurt.gym.core.persistence.repository.GymClassRepository;
 import com.kurt.gym.core.rest.api.util.CustomerUtil;
 import com.kurt.gym.core.rest.api.util.EmployeeUtil;
+import com.kurt.gym.core.rest.api.util.ScheduleUtil;
 import com.kurt.gym.core.rest.api.util.StoreUtil;
 import com.kurt.gym.core.services.StoreService;
 import com.kurt.gym.helper.service.ApiMessage;
-import com.kurt.gym.schedule.service.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +17,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 
 @RequiredArgsConstructor
 @Service
 public class StoreServiceImpl implements StoreService {
 
-    private final StoreSaleRepository storeSaleRepository;
     private final GymClassRepository gymClassRepository;
-    private final ScheduleRepository scheduleRepository;
     private final Logger logger = LoggerFactory.getLogger(StoreServiceImpl.class);
+
     @Override
     public ResponseEntity<HashMap<String, String>> save(Store t) {
         StoreUtil.save(t);
@@ -71,17 +73,16 @@ public class StoreServiceImpl implements StoreService {
     }
 
 
-
     // wil update every 1 hour
     @Override
-    @Cacheable(value="dashboard", key="#id")
+    @Cacheable(value = "dashboard", key = "#id")
     public ResponseEntity<HashMap<String, Object>> dashboard(Long id) {
         HashMap<String, Object> result = new HashMap<>();
 
         Long clientCount = CustomerUtil.countCustomer();
         Long classesCount = gymClassRepository.count();
         Long coachesCount = EmployeeUtil.countCoach();
-        Long scheduleCount = scheduleRepository.count();
+        Long scheduleCount = ScheduleUtil.count();
 
         result.put("clientCount", clientCount);
         result.put("classesCount", classesCount);
@@ -95,17 +96,35 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public ResponseEntity<?> getDateSale(Long id, Date date) {
+    public ResponseEntity<?> getDateSale(Long id, Date date, int length) {
 
-        Double storeSale = storeSaleRepository.findSalesInStoreWithDate(id, date);
+        HashMap<String, Double> result = new HashMap<>();
+        Calendar startDate = Calendar.getInstance();
+        startDate.setTime(date);
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-        if(storeSale == null) {
-            String message = "No sales found in within date " + date;
-            logger.warn(message);
-            storeSale = 0D;
+        while (length != 0) {
+
+            Double storeSale = StoreUtil.findSalesInStoreBetweenDate(id, startDate.getTime());
+
+            String requiredDate = df.format(startDate.getTime());
+
+            result.put(requiredDate, storeSale);
+
+            startDate.add(Calendar.DAY_OF_MONTH, -1);
+            length--;
         }
 
-        return new ResponseEntity<>(storeSale, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> getTodaySchedules() {
+
+
+        Set<Schedule> todaySchedule = ScheduleUtil.getScheduleTargetDate(new Date());
+
+        return new ResponseEntity<>(todaySchedule, HttpStatus.OK);
     }
 
 }

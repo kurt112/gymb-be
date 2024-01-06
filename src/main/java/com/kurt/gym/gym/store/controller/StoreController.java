@@ -34,10 +34,14 @@ public class StoreController {
         return storeService.dashboard(id);
     }
 
-    @GetMapping("/{id}/dashboard/date-sale/{date}")
-    public ResponseEntity<?> getStoreDateSale(@PathVariable Long id,@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        return storeService.getDateSale(id, date);
+    @GetMapping("/{id}/dashboard/date-sale/{date}/{length}")
+    public ResponseEntity<?> getStoreDateSale(@PathVariable Long id,@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                              @PathVariable("length") int length) {
+        return storeService.getDateSale(id, date, length);
     }
-
+    @GetMapping("/{id}/today-schedule")
+    public ResponseEntity<?> getStoreData() {
+        return storeService.getTodaySchedules();
+    }
 
 }

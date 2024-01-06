@@ -18,8 +18,8 @@ import com.kurt.gym.core.persistence.entity.GymClassType;
 import com.kurt.gym.core.services.GymClassService;
 import com.kurt.gym.core.services.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
-import com.kurt.gym.schedule.model.Schedule;
-import com.kurt.gym.schedule.model.ScheduleData;
+import com.kurt.gym.core.persistence.entity.Schedule;
+import com.kurt.gym.core.persistence.entity.ScheduleData;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,14 +1,15 @@
-package com.kurt.gym.schedule.service;
+package com.kurt.gym.core.persistence.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.kurt.gym.schedule.model.Schedule;
+import com.kurt.gym.core.persistence.entity.Schedule;
 
 import jakarta.transaction.Transactional;
 
@@ -28,4 +29,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     @Query(value = "UPDATE schedule set start_time = :startTime , end_time = :endTime WHERE id = :scheduleId", nativeQuery = true)
     void updateTime(@Param(value = "startTime") Date startTime, @Param(value = "endTime") Date endTime,
             @Param(value = "scheduleId") Long scheduleId);
+
+    @Query(value = "SELECT t from Schedule t where DATE(t.startTime) = ?1")
+    Set<Schedule> getScheduleTargetDate(Date date);
 }

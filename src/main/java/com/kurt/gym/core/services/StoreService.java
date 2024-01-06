@@ -16,5 +16,7 @@ public interface StoreService extends BaseService<Store>{
     ResponseEntity<HashMap<String,Object>> dashboard(Long id);
 
 
-    ResponseEntity<?> getDateSale(Long id, Date date);
+    ResponseEntity<?> getDateSale(Long id, Date date, int length);
+
+    ResponseEntity<?> getTodaySchedules();
 }

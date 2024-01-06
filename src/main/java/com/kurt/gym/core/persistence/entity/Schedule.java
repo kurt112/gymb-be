@@ -1,4 +1,4 @@
-package com.kurt.gym.schedule.model;
+package com.kurt.gym.core.persistence.entity;
 
 import lombok.NoArgsConstructor;
 
