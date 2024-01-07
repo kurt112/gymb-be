@@ -32,6 +32,10 @@ public class ScheduleUtil {
         return scheduleRepository.getScheduleTargetDate(yyyyMMddDate);
     }
 
+    public static void deleteById(long id){
+        scheduleRepository.deleteById(id);
+    }
+
     public static GymClass getGymClassReferenceByScheduleId (Long scheduleId){
         return null;
     }

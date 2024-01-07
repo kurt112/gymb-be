@@ -126,7 +126,8 @@ public class StoreServiceImpl implements StoreService {
         logger.info("======================== Getting Today Schedule ==================");
         logger.info(formattedDateTime);
         Set<Schedule> todaySchedule = ScheduleUtil.getScheduleTargetDate(formattedDateTime);
-
+        System.out.println("the reuslt");
+        System.out.println(todaySchedule);
         List<GymClass> gymClasses = todaySchedule.stream().map(e -> {
             GymClass gymClass = GymClassUtil.getGymClassWithoutSchedules(e.getGymClass().getId());
             gymClass.getSchedules().add(e);

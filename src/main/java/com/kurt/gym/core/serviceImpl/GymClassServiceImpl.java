@@ -1,21 +1,11 @@
 package com.kurt.gym.core.serviceImpl;
 
 import com.kurt.gym.auth.model.user.User;
-import com.kurt.gym.core.persistence.entity.Customer;
-import com.kurt.gym.core.persistence.repository.CustomerRepository;
-import com.kurt.gym.core.persistence.entity.Employee;
-import com.kurt.gym.core.persistence.repository.EmployeeRepository;
-import com.kurt.gym.core.persistence.entity.GymClass;
-import com.kurt.gym.core.persistence.entity.GymClassType;
-import com.kurt.gym.core.persistence.entity.GymClassWithUser;
+import com.kurt.gym.core.persistence.entity.*;
+import com.kurt.gym.core.persistence.repository.*;
+import com.kurt.gym.core.rest.api.util.GymClassUtil;
 import com.kurt.gym.core.services.GymClassService;
-import com.kurt.gym.core.persistence.repository.GymClassRepository;
-import com.kurt.gym.core.persistence.repository.GymClassTypeRepository;
-import com.kurt.gym.core.persistence.repository.GymClassWithUserRepository;
 import com.kurt.gym.helper.service.ApiMessage;
-import com.kurt.gym.core.persistence.entity.Schedule;
-import com.kurt.gym.core.persistence.entity.ScheduleData;
-import com.kurt.gym.core.persistence.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -37,12 +26,12 @@ import java.util.*;
 @Transactional
 public class GymClassServiceImpl implements GymClassService {
 
-    private final GymClassRepository gymClassRepository;
     private final GymClassWithUserRepository gymClassWithUserRepository;
     private final CustomerRepository customerRepository;
     private final ScheduleRepository scheduleRepository;
     private final EmployeeRepository employeeRepository;
     private final GymClassTypeRepository gymClassTypeRepository;
+
     @Transactional
     @Override
     @Caching(evict = {
@@ -71,10 +60,10 @@ public class GymClassServiceImpl implements GymClassService {
 
         t.setGymClassType(null);
         t.setIsActive(isGymClassActive);
-        gymClassRepository.save(t);
+        GymClassUtil.save(t);
 
         t.setGymClassType(gymClassType);
-        gymClassRepository.save(t);
+        GymClassUtil.save(t);
         return new ResponseEntity<>(
                 t,
                 HttpStatus.OK);
@@ -86,7 +75,7 @@ public class GymClassServiceImpl implements GymClassService {
             @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
     })
     public ResponseEntity<?> delete(GymClass t) {
-        GymClass gymClass = gymClassRepository.findById(t.getId()).orElse(null);
+        GymClass gymClass = GymClassUtil.findById(t.getId());
 
         if (gymClass == null)
             return ApiMessage.errorResponse("GymClass not found");
@@ -102,7 +91,7 @@ public class GymClassServiceImpl implements GymClassService {
 
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
-        GymClass gymClass = gymClassRepository.findById(id).orElse(null);
+        GymClass gymClass = GymClassUtil.findById(id);
 
         if (gymClass == null)
             return ApiMessage.errorResponse("GymClass not found");
@@ -114,8 +103,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Cacheable(value = "gym-class-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<GymClass>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        System.out.println(search);
-        Page<GymClass> classes = gymClassRepository.getGymClassWithoutSchedules(search, pageable);
+        Page<GymClass> classes = GymClassUtil.getGymClassWithoutSchedulesPagable(search, pageable);
 
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }
@@ -123,7 +111,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @Cacheable(cacheNames = "gymClass", key = "#id")
     public ResponseEntity<?> findOne(Long id) {
-        GymClass gymClass = gymClassRepository.findById(id).orElse(null);
+        GymClass gymClass = GymClassUtil.findById(id);
 
         if (gymClass == null)
             return ApiMessage.errorResponse("Gym class not found");
@@ -134,7 +122,7 @@ public class GymClassServiceImpl implements GymClassService {
     }
 
     public GymClass referencedById(Long id) {
-        return gymClassRepository.getReferenceById(id);
+        return GymClassUtil.getReferenceById(id);
     }
 
     @Override
@@ -158,7 +146,7 @@ public class GymClassServiceImpl implements GymClassService {
             return ApiMessage.errorResponse("No Customer Found");
         }
 
-        GymClass gymClass = gymClassRepository.getReferenceById(gymClassId);
+        GymClass gymClass = GymClassUtil.getReferenceById(gymClassId);
 
         if (gymClass == null) {
             return ApiMessage.errorResponse("Gym Class Not Found");
@@ -220,7 +208,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @Cacheable(value = "gym-class-schedules-all")
     public ResponseEntity<?> getGymClasses() {
-        List<GymClass> list = gymClassRepository.getGymClassesSchedule();
+        List<GymClass> list = GymClassUtil.getGymClassesSchedule();
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
@@ -233,77 +221,15 @@ public class GymClassServiceImpl implements GymClassService {
     })
     public ResponseEntity<?> generateGymClassSchedule(long gymClassId, List<ScheduleData> scheduleDatas) {
 
-        GymClass currentGymClass = gymClassRepository.findById(gymClassId).orElse(null);
+        GymClass currentGymClass = GymClassUtil.findById(gymClassId);
+
+        GymClassUtil.generateSchedule(currentGymClass, scheduleDatas);
 
         if (currentGymClass == null) {
             return ApiMessage.errorResponse("No Gym Class Found");
         }
 
-        // Looping the schedule data so that we can assure the arrangement of schedule
-        // with day
 
-        HashMap<Short, ScheduleData> scheduleMap = new HashMap<>();
-
-        for (ScheduleData scheduleData : scheduleDatas) {
-            scheduleMap.put(scheduleData.getDay(), scheduleData);
-        }
-
-        List<Schedule> newSchedules = new ArrayList<>();
-
-        Calendar dateStart = Calendar.getInstance();
-        dateStart.setTime(currentGymClass.getDateStart());
-
-        Calendar dateEnd = Calendar.getInstance();
-        dateEnd.setTime(currentGymClass.getDateEnd());
-
-        dateEnd.add(Calendar.DAY_OF_WEEK, 1);
-
-        currentGymClass.getSchedules().forEach(e -> {
-            this.scheduleRepository.deleteScheduleById(e.getId());
-        });
-
-        while (dateStart.before(dateEnd)) {
-
-            int currentDay = dateStart.get(Calendar.DAY_OF_WEEK);
-
-            // in js the Sunday the inedex is zero so we minus 1
-            short possibleDaySched = (short) (currentDay - 1);
-
-            ScheduleData scheduleData = scheduleMap.get(possibleDaySched);
-
-            if (scheduleData == null) {
-                dateStart.add(Calendar.DAY_OF_WEEK, 1);
-                continue;
-            }
-
-            Date startDateWithTime = scheduleData.getStartTime();
-            Date endDateWithTime = scheduleData.getEndTime();
-
-            Calendar startDateWithTimeCalendar = Calendar.getInstance();
-            startDateWithTimeCalendar.setTime(startDateWithTime);
-            startDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR),
-                    dateStart.get(Calendar.MONTH),
-                    dateStart.get(Calendar.DAY_OF_MONTH));
-
-            Calendar endDateWithTimeCalendar = Calendar.getInstance();
-            endDateWithTimeCalendar.setTime(endDateWithTime);
-            endDateWithTimeCalendar.set(dateStart.get(Calendar.YEAR),
-                    dateStart.get(Calendar.MONTH),
-                    dateStart.get(Calendar.DAY_OF_MONTH));
-
-            Schedule schedule = Schedule
-                    .builder()
-                    .endTime(endDateWithTimeCalendar.getTime())
-                    .startTime(startDateWithTimeCalendar.getTime())
-                    .gymClass(currentGymClass)
-                    .instructor(currentGymClass.getInstructor())
-                    .build();
-
-            newSchedules.add(schedule);
-            scheduleRepository.save(schedule);
-
-            dateStart.add(Calendar.DAY_OF_WEEK, 1);
-        }
 
         return ApiMessage.successResponse("Generated schedule success");
     }
@@ -321,7 +247,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     public ResponseEntity<?> assignGymClassInstructor(long gymClassId, long instructorId) {
 
-        GymClass gymClass = this.gymClassRepository.getReferenceById(gymClassId);
+        GymClass gymClass = GymClassUtil.getReferenceById(gymClassId);
 
         if (gymClass == null)
             return ApiMessage.errorResponse("Can't find gym class with id of " + gymClassId);
@@ -338,7 +264,7 @@ public class GymClassServiceImpl implements GymClassService {
         gymClass.setInstructor(employee);
         gymClass.setInstructorName(instructorName);
 
-        this.gymClassRepository.save(gymClass);
+        GymClassUtil.save(gymClass);
 
         return ApiMessage.successResponse("Assign instructor success");
     }
@@ -416,7 +342,7 @@ public class GymClassServiceImpl implements GymClassService {
     })
     public ResponseEntity<?> saveGymClassSchedule(Long gymClassId, Schedule schedule) {
 
-        GymClass gymClass = gymClassRepository.getReferenceById(gymClassId);
+        GymClass gymClass = GymClassUtil.getReferenceById(gymClassId);
 
         Schedule existingSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
 

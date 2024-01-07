@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kurt.gym.core.persistence.entity.GymClass;
 import com.kurt.gym.core.persistence.entity.GymClassType;
 import com.kurt.gym.core.services.GymClassService;
-import com.kurt.gym.core.services.GymClassWithUserService;
 import com.kurt.gym.helper.service.ApiMessage;
 import com.kurt.gym.core.persistence.entity.Schedule;
 import com.kurt.gym.core.persistence.entity.ScheduleData;
@@ -29,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 public class GymClassController {
 
     private final GymClassService gymClassService;
-    private final GymClassWithUserService gymClassWithUserService;
 
     @GetMapping
     public ResponseEntity<?> getClasses(
