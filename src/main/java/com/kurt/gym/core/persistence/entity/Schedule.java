@@ -1,5 +1,6 @@
 package com.kurt.gym.core.persistence.entity;
 
+import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
@@ -8,14 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kurt.gym.core.persistence.entity.Employee;
 import com.kurt.gym.core.persistence.entity.GymClass;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PreRemove;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,7 +39,7 @@ public class Schedule {
     private Employee instructor;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private GymClass gymClass;
 
     @PreRemove

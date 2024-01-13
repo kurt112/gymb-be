@@ -1,91 +1,146 @@
 package com.kurt.gym.classes;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kurt.gym.core.persistence.entity.GymClass;
 import com.kurt.gym.core.persistence.entity.GymClassType;
-import com.kurt.gym.core.persistence.entity.ScheduleData;
-import com.kurt.gym.core.rest.api.util.GymClassUtil;
-import com.kurt.gym.core.rest.api.util.ScheduleUtil;
-import com.kurt.gym.util.schedule.ScheduleUtilTest;
+import com.kurt.gym.core.persistence.entity.Schedule;
+import com.kurt.gym.helper.logger.LoggerUtil;
+import org.json.JSONException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-@DataJpaTest()
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(SpringExtension.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class GymClassTest {
 
     static GymClass gymClass;
-    static String initialClassName = "Initial Class";
-    private static int default_pricing = 20;
-    private static int defaulltSession = 20;
+
+    static GymClassType gymClassType;
+    static List<Schedule> scheduleList;
+
+    private static RestTemplate restTemplate;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GymClassTest.class);
+    private final static String URI = "http://localhost:8080/api/v1/gym/classes";
+
+    private static HttpHeaders headers;
 
     @BeforeAll
-    static void initialData() {
+    static void initialData() throws JSONException {
 
+        LoggerUtil.printInfoWithDash(LOGGER, "INITIALIZING DATA");
+        restTemplate = new RestTemplate();
+        headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+
+        Calendar dateStart = Calendar.getInstance();
+        dateStart.set(Calendar.MONTH, Calendar.JANUARY);
+
+        Calendar dateEnd = Calendar.getInstance();
+        dateEnd.add(Calendar.YEAR, 1);
+
+        // the start of schedule
+        Calendar timeStart = Calendar.getInstance();
+        timeStart.setTime(dateStart.getTime());
+
+        // setting the time to 00:00 = 24 hour format
+        timeStart.set(Calendar.HOUR, 0);
+        timeStart.set(Calendar.MINUTE, 0);
+
+        Calendar timeEnd = Calendar.getInstance();
+        timeEnd.setTime(dateEnd.getTime());
+
+        List<Schedule> schedulesList = new ArrayList<>();
+
+        schedulesList.add(Schedule.builder().startTime(timeStart.getTime()).endTime(timeEnd.getTime()).gymClass(gymClass).build());
+
+//        schedulesList.add(Schedule.builder().startTime(timeStart.getTime()).endTime(timeEnd.getTime()).gymClass(gymClass).build());
+
+        gymClassType = GymClassType.builder()
+                .name("Gym Class Test 102")
+                .build();
+
+        gymClass = GymClass
+                .builder()
+                .name("Test Gym Class 102")
+                .price(20)
+                .session(20)
+                .allowedNonMembers(false)
+                .gymClassType(gymClassType)
+                .dateStart(dateStart.getTime())
+                .dateEnd(dateEnd.getTime())
+                .schedules(schedulesList)
+                .build();
+
+
+        HttpEntity<GymClass> request =
+                new HttpEntity<>(gymClass, headers);
+
+        ResponseEntity<GymClass> result = restTemplate.postForEntity(URI, request, GymClass.class);
+
+        assertNotNull(result.getBody());
+
+        gymClass = result.getBody();
+
+        LoggerUtil.printInfoWithDash(LOGGER, "DONE INITIALIZING");
+    }
+
+    @Test
+    void verifyIfGymClassExist() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        assertNotNull(gymClass.getId());
+        ResponseEntity<GymClass> result = restTemplate.getForEntity(URI + "/" + gymClass.getId(), GymClass.class);
+        assertNotNull(result.getBody());
+        assertEquals(gymClass.getId(), result.getBody().getId());
+
+
+        ResponseEntity<List<Schedule>> getScheduleList = restTemplate.getForEntity(URI + "/" + gymClass.getId() + "/schedules", (Class<List<Schedule>>) (Object) List.class);
+
+
+
+        assertNotNull(getScheduleList.getBody());
+
+        scheduleList = mapper.convertValue(getScheduleList.getBody(), new TypeReference<>() {});
+
+
+        assertNotNull(scheduleList);
     }
 
     @Test
     void createSchedule() {
 
-        Calendar dateStart = Calendar.getInstance();
-        dateStart.set(2024, Calendar.JANUARY, 1);
 
-        Calendar dateEnd = Calendar.getInstance();
-        dateStart.set(2024, Calendar.DECEMBER, 1);
 
-        gymClass = GymClass
-                .builder()
-                .name("Sample Gym Class")
-                .dateStart(dateStart.getTime())
-                .dateEnd(dateEnd.getTime())
-                .price(default_pricing)
-                .session(defaulltSession)
-                .build();
-
-        try (var ms = Mockito.mockStatic(GymClassUtil.class)) {
-//             Mockito.when(GymClassUtil.save(gymClass)).thenReturn(GymClass);
-
-            System.out.println("The id");
-            GymClassUtil.save(gymClass);
-            System.out.println(gymClass.getId());
-//            GymClassType gymClassType = GymClassType.builder()
-//                    .name(initialClassName)
-//                    .build();
-//
-//            Mockito.when(GymClassUtil.save(gymClass)).thenReturn(gymClass);
-//
-//            GymClassUtil.saveGymClassType(gymClassType);
-//            gymClassType.getGymClasses().add(gymClass);
-//            GymClassUtil.saveGymClassType(gymClassType);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-//
-
-//
-
-//
-//        List<ScheduleData> scheduleData = ScheduleUtilTest.generateScheduleDataList();
-//
-//        GymClassUtil.generateSchedule(gymClass, scheduleData);
     }
 
     @AfterAll
     static void deleteAllDateCreated() {
+        LoggerUtil.printInfoWithDash(LOGGER, "DELETING DATA USE IN GYM CLASS");
 
-//        gymClass.getSchedules().forEach(schedule -> ScheduleUtil.deleteById(schedule.getId()));
-//
-//        GymClassUtil.deleteGymClassTypeById(gymClass.getGymClassType().getId());
-//        GymClassUtil.deleteById(gymClass.getId());
+        scheduleList.forEach(schedule -> assertDoesNotThrow(() -> restTemplate.delete(URI + "/" + gymClass.getId() + "/schedules/" + schedule.getId(), String.class)));
 
+        assertDoesNotThrow(() -> restTemplate.delete(URI + "/" + gymClass.getId(), String.class));
+
+        LoggerUtil.printInfoWithDash(LOGGER, "DONE DELETING");
     }
 }

@@ -41,6 +41,10 @@ public class Store {
 
     private BigDecimal totalSales;
 
+    private BigDecimal vatPercentage;
+
+    private BigDecimal totalVat;
+
     @JsonIgnore
     @OneToMany(mappedBy = "store")
     private List<StoreSale> sales;

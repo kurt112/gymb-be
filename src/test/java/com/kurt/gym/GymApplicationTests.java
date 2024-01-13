@@ -9,8 +9,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @ExtendWith(SpringExtension.class)
-@DataJpaTest()
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 class GymApplicationTests {
 
 	@Test

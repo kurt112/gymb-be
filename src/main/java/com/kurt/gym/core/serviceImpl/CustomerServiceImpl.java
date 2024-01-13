@@ -144,7 +144,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         Customer customer =  CustomerUtil.findCustomerByFirstNameLastNameAndMiddleName(firstName,lastName,middleName);
 
-        if(customer.getUser() == null)  return ApiMessage.errorResponse("User not found");
+        if(customer == null || customer.getUser() == null)  return ApiMessage.errorResponse("User not found");
 
         User assignedUser = jwt.getUserInToken(userTokenAssign);
         topUp(customer.getUser(),assignedUser,amount);

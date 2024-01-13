@@ -4,6 +4,7 @@ import com.kurt.gym.core.persistence.entity.Store;
 import com.kurt.gym.core.persistence.entity.StoreSale;
 import com.kurt.gym.core.persistence.repository.StoreRepository;
 import com.kurt.gym.core.persistence.repository.StoreSaleRepository;
+import com.kurt.gym.helper.logger.LoggerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,6 +14,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 
@@ -71,13 +73,27 @@ public class StoreUtil {
     }
 
     public static void insertSale(Store store, BigDecimal value, Date date) {
+        LoggerUtil.printInfoWithDash(logger, "Inserting Store Sale");
+
         if (store == null) {
             // default store
             store = StoreUtil.getReferenceById(1L);
         }
 
+        logger.info("The value that will insert in this sale: " + value.doubleValue());
+
         BigDecimal storeCurrentValue = store.getTotalSales();
+        logger.info("Current StoreSale: " + storeCurrentValue.doubleValue());
+
         storeCurrentValue = storeCurrentValue.add(value);
+        logger.info("The total after the sum: " +storeCurrentValue.doubleValue());
+
+        BigDecimal storeCurrentVatPercentageThisDay = store.getVatPercentage().divide(new BigDecimal(100),6, RoundingMode.DOWN);
+        logger.info("The percentage of vat: " + storeCurrentVatPercentageThisDay.doubleValue());
+
+        BigDecimal vatCollectedInThisSale = storeCurrentVatPercentageThisDay.multiply(value);
+        logger.info("The vat collected in this sale: " + vatCollectedInThisSale);
+
 
         StoreSale storeSale = storeSaleRepository.findStoreSaleByCreatedAt(date);
 
@@ -85,6 +101,7 @@ public class StoreUtil {
             storeSale = StoreSale.builder()
                     .sales(value)
                     .store(store)
+                    .totalVatCollected(new BigDecimal(0))
                     .build();
         } else {
             BigDecimal newTotalSaleWithinDay = storeSale.getSales();
@@ -92,14 +109,23 @@ public class StoreUtil {
             storeSale.setSales(newTotalSaleWithinDay);
         }
 
-        store.setTotalSales(storeCurrentValue);
+        BigDecimal totalVatCollected = storeSale.getTotalVatCollected().add(vatCollectedInThisSale);
 
+        BigDecimal newTotalVatInStore = store.getTotalVat().add(vatCollectedInThisSale);
+
+        logger.info("The vat this day: " + totalVatCollected);
+        store.setTotalSales(storeCurrentValue);
+        store.setTotalVat(newTotalVatInStore);
+
+        storeSale.setTotalVatCollected(totalVatCollected);
         storeSaleRepository.saveAndFlush(storeSale);
         StoreUtil.save(store);
+
+        LoggerUtil.printInfoWithDash(logger, "Done Updating the sale");
     }
 
     public static Double findSalesInStoreBetweenDate(Long storeId, Date targetDate){
-        logger.info("================================ Querying Sales ================================");
+        LoggerUtil.printInfoWithDash(logger, "Querying Sales");
         logger.info("The Target Date: " + targetDate.toString());
         return storeSaleRepository.findSalesInTargetDate(storeId, targetDate);
     }

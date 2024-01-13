@@ -5,7 +5,6 @@ import com.kurt.gym.core.persistence.entity.Schedule;
 import com.kurt.gym.core.persistence.repository.ScheduleRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Set;
 
 @Component
@@ -21,7 +20,9 @@ public class ScheduleUtil {
     }
 
     public static void save(Schedule schedule){
-
+        System.out.println("saving from repo");
+        System.out.println(schedule.getGymClass().getId());
+        scheduleRepository.saveAndFlush(schedule);
     }
 
     public static Long count(){

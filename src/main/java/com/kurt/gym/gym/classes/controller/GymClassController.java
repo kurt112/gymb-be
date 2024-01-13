@@ -38,6 +38,12 @@ public class GymClassController {
         return gymClassService.data(search, size, page - 1);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getGymClass(@PathVariable Long id) {
+
+        return gymClassService.findOne(id);
+    }
+
     @PostMapping
     public ResponseEntity<?> addGymClass(@RequestBody GymClass gymClass) {
         return gymClassService.save(gymClass);
@@ -55,9 +61,11 @@ public class GymClassController {
         return gymClassService.save(gymClass);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getEmployee(@PathVariable Long id) {
-        return gymClassService.findOne(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteGymClass(@PathVariable Long id) {
+
+
+        return gymClassService.deleteById(id);
     }
 
     @PostMapping("/{gymClassId}/enroll-customer/{rfId}")

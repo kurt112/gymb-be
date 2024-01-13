@@ -4,7 +4,9 @@ import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.core.persistence.entity.*;
 import com.kurt.gym.core.persistence.repository.*;
 import com.kurt.gym.core.rest.api.util.GymClassUtil;
+import com.kurt.gym.core.rest.api.util.ScheduleUtil;
 import com.kurt.gym.core.services.GymClassService;
+import com.kurt.gym.helper.logger.LoggerUtil;
 import com.kurt.gym.helper.service.ApiMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,7 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @Caching(evict = {
             @CacheEvict(cacheNames = "gym-class-data", allEntries = true),
-            @CacheEvict(cacheNames = { "gymClass" }, key = "#t.id")
+            @CacheEvict(cacheNames = {"gymClass"}, key = "#t.id")
     })
     public ResponseEntity<GymClass> save(GymClass t) {
 
@@ -44,7 +46,6 @@ public class GymClassServiceImpl implements GymClassService {
 
         GymClassType gymClassType = t.getGymClassType();
 
-        System.out.println(gymClassType.getName());
 
         if (t.getDateStart() != null) {
             dateStart.setTime(t.getDateStart());
@@ -62,8 +63,20 @@ public class GymClassServiceImpl implements GymClassService {
         t.setIsActive(isGymClassActive);
         GymClassUtil.save(t);
 
+        if (t.getSchedules() != null && !t.getSchedules().isEmpty()) {
+            System.out.println("i am saving");
+            for(Schedule schedule: t.getSchedules()){
+                if (schedule.getGymClass() == null) {
+                    schedule.setGymClass(t);
+                    ScheduleUtil.save(schedule);
+                }
+            }
+        }
+
         t.setGymClassType(gymClassType);
         GymClassUtil.save(t);
+
+
         return new ResponseEntity<>(
                 t,
                 HttpStatus.OK);
@@ -71,7 +84,7 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(cacheNames = { "gymClass" }, key = "#t.id"),
+            @CacheEvict(cacheNames = {"gymClass"}, key = "#t.id"),
             @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
     })
     public ResponseEntity<?> delete(GymClass t) {
@@ -85,16 +98,17 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(cacheNames = { "gymClass" }, key = "#id"),
+            @CacheEvict(cacheNames = {"gymClass"}, key = "#id"),
             @CacheEvict(cacheNames = "gym-class-data", allEntries = true)
     })
-
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
         GymClass gymClass = GymClassUtil.findById(id);
 
         if (gymClass == null)
             return ApiMessage.errorResponse("GymClass not found");
+
+        GymClassUtil.deleteById(id);
 
         return ApiMessage.successResponse("GymClass deleted");
     }
@@ -116,7 +130,7 @@ public class GymClassServiceImpl implements GymClassService {
         if (gymClass == null)
             return ApiMessage.errorResponse("Gym class not found");
 
-        return new ResponseEntity<GymClass>(
+        return new ResponseEntity<>(
                 gymClass,
                 HttpStatus.OK);
     }
@@ -136,7 +150,7 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "gym-class-members", key ="#gymClassId" )
+            @CacheEvict(value = "gym-class-members", key = "#gymClassId")
     })
     public ResponseEntity<?> enrollCustomer(String rfId, long gymClassId) {
 
@@ -179,7 +193,7 @@ public class GymClassServiceImpl implements GymClassService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "gym-class-members", key ="#gymClassId" )
+            @CacheEvict(value = "gym-class-members", key = "#gymClassId")
     })
     public ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId) {
 
@@ -230,7 +244,6 @@ public class GymClassServiceImpl implements GymClassService {
         }
 
 
-
         return ApiMessage.successResponse("Generated schedule success");
     }
 
@@ -238,8 +251,6 @@ public class GymClassServiceImpl implements GymClassService {
     @Cacheable(value = "gym-class-schedules", key = "#gymClassId")
     public ResponseEntity<?> getGymClassSchedule(long gymClassId) {
         List<Schedule> list = scheduleRepository.getGymClassSchedules(gymClassId);
-
-        System.out.println(list.size());
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

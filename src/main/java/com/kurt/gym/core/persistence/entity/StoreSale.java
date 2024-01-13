@@ -40,6 +40,8 @@ public class StoreSale {
 
     private BigDecimal sales;
 
+    private BigDecimal totalVatCollected;
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     @Temporal(TemporalType.DATE)

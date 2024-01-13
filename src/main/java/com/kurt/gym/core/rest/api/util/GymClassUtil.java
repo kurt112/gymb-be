@@ -85,9 +85,7 @@ public class GymClassUtil {
 
         dateEnd.add(Calendar.DAY_OF_WEEK, 1);
 
-        currentGymClass.getSchedules().forEach(e -> {
-            ScheduleUtil.deleteById(e.getId());
-        });
+        currentGymClass.getSchedules().forEach(e -> ScheduleUtil.deleteById(e.getId()));
 
         while (dateStart.before(dateEnd)) {
 

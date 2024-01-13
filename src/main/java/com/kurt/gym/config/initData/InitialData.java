@@ -88,6 +88,8 @@ public class InitialData {
                     .totalSales(new BigDecimal(0))
                     .email("kurtorioque112@gmail.com")
                     .amountNeedToEarnOnePoint(new BigDecimal(30))
+                    .vatPercentage(BigDecimal.valueOf(1.5))
+                    .totalVat(new BigDecimal(0))
                     .build();
 
             storeRepository.save(store);
