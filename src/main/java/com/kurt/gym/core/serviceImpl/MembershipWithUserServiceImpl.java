@@ -48,6 +48,11 @@ public class MembershipWithUserServiceImpl implements MembershipWithUserService 
     }
 
     @Override
+    public MembershipWithUser referenceById(Long id) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<?> data(String search, int size, int page) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'data'");

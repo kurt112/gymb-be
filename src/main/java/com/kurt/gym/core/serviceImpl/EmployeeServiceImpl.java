@@ -8,6 +8,10 @@ import com.kurt.gym.core.services.EmployeeService;
 import com.kurt.gym.helper.model.AutoComplete;
 import com.kurt.gym.helper.service.ApiMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +26,11 @@ import java.util.HashMap;
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "employee-data", allEntries = true),
+            @CacheEvict(cacheNames = "employee-coach", allEntries = true),
+    })
+    @CachePut(cacheNames = "employee", key = "#t.id")
     public ResponseEntity<Employee> save(Employee t) {
         t.getUser().activate(StoreUtil.getDefaultStore());
         EmployeeUtil.save(t);
@@ -32,6 +41,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "employee" }, key = "#t.id"),
+            @CacheEvict(cacheNames = {"employee-data", "employee-coach"}, allEntries = true),
+            @CacheEvict(cacheNames = { "employee-reference" }, key = "#t.id"),
+    })
     public ResponseEntity<HashMap<String, String>> delete(Employee t) {
         Employee dbEmp = EmployeeUtil.findById(t.getId());
         if (dbEmp != null)
@@ -41,6 +55,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "employee" }, key = "#id"),
+            @CacheEvict(cacheNames = {"employee-data","employee-coach"}, allEntries = true),
+            @CacheEvict(cacheNames = { "employee-reference" }, key = "#id")
+    })
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
         Employee dbEmp = EmployeeUtil.findById(id);
         if (dbEmp != null)
@@ -51,6 +70,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<Employee>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Employee> employees = EmployeeUtil.findAllByOrderByCreatedAtDesc(search, pageable);
@@ -59,6 +79,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(cacheNames = "employee", key = "#id")
     public ResponseEntity<?> findOne(Long id) {
         Employee employeeFromDb = EmployeeUtil.findById(id);
 
@@ -71,6 +92,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(cacheNames = {"employee-reference"}, key = "#id")
+    public Employee referenceById(Long id) {
+        return EmployeeUtil.getReferenceById(id);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "employee-coach", key = "#search")
     public ResponseEntity<?> getEmployeeCoachAutoComplete(String search) {
         Pageable pageable = PageRequest.of(0, 10);
         Page<AutoComplete> employees = EmployeeUtil.findEmployeeCoachBySearch(search, pageable);
@@ -79,6 +107,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #role, #page)")
     public ResponseEntity<?> data(String search, Integer role, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         UserRole userRole = UserRole.getRole(role);

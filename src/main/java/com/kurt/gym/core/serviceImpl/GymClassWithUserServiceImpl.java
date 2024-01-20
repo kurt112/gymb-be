@@ -47,6 +47,11 @@ public class GymClassWithUserServiceImpl implements GymClassWithUserService {
         throw new UnsupportedOperationException("Unimplemented method 'findOne'");
     }
 
+    @Override
+    public GymClassWithUser referenceById(Long id) {
+        return null;
+    }
+
     public GymClassWithUser referencedById(Long id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'referencedById'");

@@ -49,10 +49,8 @@ public class Customer {
     // for attendance if the customer is out or in gym
     private Boolean isOut;
 
-    @Temporal(TemporalType.DATE)
     private Date timeIn;
 
-    @Temporal(TemporalType.DATE)
     private Date timeOut;
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -92,17 +90,17 @@ public class Customer {
         this.isMember = !this.rfId.isBlank();
 
         // if the status is null meaning it's for creation
-        if(this.isMember) this.status = CustomerStatus.MEMBER;
+        if (this.isMember) this.status = CustomerStatus.MEMBER;
         else this.status = CustomerStatus.NON_MEMBER;
 
-        if(isOut == null){
+        if (isOut == null) {
             this.isOut = false;
         }
 
     }
-    
+
     // for customer table
-    public Customer (long id, User user, CustomerStatus status) {
+    public Customer(long id, User user, CustomerStatus status) {
         this.id = id;
         this.user = user;
         this.status = status;

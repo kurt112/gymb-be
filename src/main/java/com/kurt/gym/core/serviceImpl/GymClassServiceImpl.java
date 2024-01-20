@@ -3,6 +3,8 @@ package com.kurt.gym.core.serviceImpl;
 import com.kurt.gym.auth.model.user.User;
 import com.kurt.gym.core.persistence.entity.*;
 import com.kurt.gym.core.persistence.repository.*;
+import com.kurt.gym.core.rest.api.util.CustomerUtil;
+import com.kurt.gym.core.rest.api.util.EmployeeUtil;
 import com.kurt.gym.core.rest.api.util.GymClassUtil;
 import com.kurt.gym.core.rest.api.util.ScheduleUtil;
 import com.kurt.gym.core.services.GymClassService;
@@ -135,7 +137,9 @@ public class GymClassServiceImpl implements GymClassService {
                 HttpStatus.OK);
     }
 
-    public GymClass referencedById(Long id) {
+    @Override
+    @Cacheable(cacheNames = "gym-class-reference-by-id", key = "#id")
+    public GymClass referenceById(Long id) {
         return GymClassUtil.getReferenceById(id);
     }
 
@@ -160,13 +164,13 @@ public class GymClassServiceImpl implements GymClassService {
             return ApiMessage.errorResponse("No Customer Found");
         }
 
-        GymClass gymClass = GymClassUtil.getReferenceById(gymClassId);
+        GymClass gymClass = this.referenceById(gymClassId);
 
         if (gymClass == null) {
             return ApiMessage.errorResponse("Gym Class Not Found");
         }
 
-        Customer customer = customerRepository.getReferenceById(customerId);
+        Customer customer = CustomerUtil.getReferenceById(customerId);
 
         if (!gymClass.getAllowedNonMembers() && !customer.getIsMember()) {
             return ApiMessage.errorResponse("Customer is not subscribed to any membership");
@@ -197,13 +201,13 @@ public class GymClassServiceImpl implements GymClassService {
     })
     public ResponseEntity<?> unEnrollGymClassCustomer(String rfId, long gymClassId) {
 
-        Long customerId = customerRepository.findCustomerIdByRfID(rfId);
+        Long customerId = CustomerUtil.findCustomerIdByRfID(rfId);
 
         if (customerId == null) {
             return ApiMessage.errorResponse("No Customer Found");
         }
 
-        Customer customer = customerRepository.getReferenceById(customerId);
+        Customer customer = CustomerUtil.getReferenceById(customerId);
 
         Long gymClassWithUserId = gymClassWithUserRepository.getGymClassWithUser(gymClassId, customer.getUser().getId());
 
@@ -258,12 +262,12 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     public ResponseEntity<?> assignGymClassInstructor(long gymClassId, long instructorId) {
 
-        GymClass gymClass = GymClassUtil.getReferenceById(gymClassId);
+        GymClass gymClass = this.referenceById(gymClassId);
 
         if (gymClass == null)
             return ApiMessage.errorResponse("Can't find gym class with id of " + gymClassId);
 
-        Employee employee = this.employeeRepository.getReferenceById(instructorId);
+        Employee employee = EmployeeUtil.getReferenceById(instructorId);
 
         if (employee == null)
             return ApiMessage.errorResponse("Can't find employee with id of " + instructorId);
@@ -353,7 +357,7 @@ public class GymClassServiceImpl implements GymClassService {
     })
     public ResponseEntity<?> saveGymClassSchedule(Long gymClassId, Schedule schedule) {
 
-        GymClass gymClass = GymClassUtil.getReferenceById(gymClassId);
+        GymClass gymClass = this.referenceById(gymClassId);
 
         Schedule existingSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
 

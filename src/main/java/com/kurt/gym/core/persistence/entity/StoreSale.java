@@ -50,4 +50,9 @@ public class StoreSale {
     @UpdateTimestamp
     @Temporal(TemporalType.DATE)
     private Date updatedAt;
+
+    public StoreSale(double sales, double totalVatCollected){
+        this.sales = BigDecimal.valueOf(sales);
+        this.totalVatCollected = BigDecimal.valueOf(totalVatCollected);
+    }
 }

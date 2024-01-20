@@ -22,37 +22,22 @@ public class EmployeeUtil {
         EmployeeUtil.employeeRepository = employeeRepository;
     }
 
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "employee-data", allEntries = true),
-    })
-    @CachePut(cacheNames = "employee", key = "#employee.id")
     public static void save(Employee employee) {
         employeeRepository.saveAndFlush(employee);
     }
 
-    @Cacheable(cacheNames = "employee", key = "#id")
     public static Employee findById(Long id) {
         return employeeRepository.findById(id).orElse(null);
     }
 
-    @Caching(evict = {
-            @CacheEvict(cacheNames = { "employee" }, key = "#id"),
-            @CacheEvict(cacheNames = "employee-data", allEntries = true),
-            @CacheEvict(cacheNames = { "employee-reference" }, key = "#id")
-    })
     public static void deleteById(Long id) {
         employeeRepository.deleteById(id);
     }
-    @Caching(evict = {
-            @CacheEvict(cacheNames = { "employee" }, key = "#t.id"),
-            @CacheEvict(cacheNames = "employee-data", allEntries = true),
-            @CacheEvict(cacheNames = { "employee-reference" }, key = "#t.id")
-    })
+
     public static void delete(Employee employee) {
         employeeRepository.delete(employee);
     }
 
-    @Cacheable(cacheNames = {"employee-reference"}, key = "#id")
     public static Employee getReferenceById(Long id) {
         return employeeRepository.getReferenceById(id);
     }
@@ -61,7 +46,6 @@ public class EmployeeUtil {
         return employeeRepository.countCoach(UserRole.COACH);
     }
 
-    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public static Page<Employee> findAllByOrderByCreatedAtDesc(String search, Pageable pageable) {
         return employeeRepository.findAllByOrderByCreatedAtDesc(search, pageable);
     }
@@ -69,7 +53,7 @@ public class EmployeeUtil {
     public static Page<AutoComplete> findEmployeeCoachBySearch(String search, Pageable pageable) {
         return employeeRepository.findEmployeeCoachBySearch(search, pageable);
     }
-    @Cacheable(value = "employee-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #role, #pageable)")
+
     public static Page<Employee> findAllEmployeeWithRoleByOrderByCreatedAtDesc(String search, UserRole role, Pageable pageable) {
         return employeeRepository.findAllEmployeeWithRoleByOrderByCreatedAtDesc(search, role, pageable);
     }

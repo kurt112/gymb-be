@@ -18,6 +18,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +49,14 @@ public class CustomerServiceImpl implements CustomerService {
     private final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
 
     @Override
+    @Caching(
+            put = {
+                    @CachePut(cacheNames = {"customer"}, key = "#customer.id")
+            },
+            evict = {
+                    @CacheEvict(cacheNames = {"customers-table-data"}, allEntries = true)
+            }
+    )
     public ResponseEntity<Customer> save(Customer t) {
         t.getUser().activate(StoreUtil.getDefaultStore());
         t.getUser().setRole(UserRole.CUSTOMER);
@@ -56,6 +68,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { "customer" }, key = "#t.id"),
+            @CacheEvict(cacheNames = { "customers-table-data" }, allEntries = true),
+            @CacheEvict(cacheNames = { "customer-reference-rfId" }, key = "#t.rfId"),
+            @CacheEvict(cacheNames = {"customers-today-data"}, allEntries = true)
+    })
     public ResponseEntity<HashMap<String, String>> delete(Customer t) {
 
         Customer fromDb = CustomerUtil.findById(t.getId());
@@ -69,6 +87,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(cacheNames = {"customer"}, key = "#id"),
+            @CacheEvict(cacheNames = {"customers-table-data"}, allEntries = true),
+            @CacheEvict(cacheNames = {"customer-reference-rfId"}, allEntries = true),
+            @CacheEvict(cacheNames = {"customers-today-data"}, allEntries = true)
+    })
     public ResponseEntity<HashMap<String, String>> deleteById(Long id) {
 
         Customer fromDb = CustomerUtil.findById(id);
@@ -82,6 +106,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Cacheable(value = "customers-table-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<Page<Customer>> data(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Customer> customers = CustomerUtil.findAllByOrderByCreatedAtDesc(search, pageable);
@@ -89,6 +114,7 @@ public class CustomerServiceImpl implements CustomerService {
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
+    @Cacheable(cacheNames = {"customer"}, key = "#id")
     public ResponseEntity<?> findOne(Long id) {
         Customer fromDb = CustomerUtil.findById(id);
 
@@ -101,6 +127,16 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Cacheable(cacheNames =  "customer-reference-id", key = "#id")
+    public Customer referenceById(Long id) {
+        return CustomerUtil.getReferenceById(id);
+    }
+
+    @Override
+    @Cacheable(value = "customer-reference-rfId", key = "#rfId")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = {"customers-today-data"}, allEntries = true)
+    })
     public ResponseEntity<?> updateCustomerAttendanceByRfId(String rfId) {
 
         HashMap<String, String> result = new HashMap<>();
@@ -109,15 +145,16 @@ public class CustomerServiceImpl implements CustomerService {
         if (customerId == null)
             return ApiMessage.errorResponse("Customer Not Found");
 
-        Customer customer = CustomerUtil.getReferenceById(customerId);
+        Customer customer = referenceById(customerId);
         User user = customer.getUser();
 
-        updateCustomerAttendance(customer,user, result);
+        updateCustomerAttendance(customer, user, result);
 
-        return new ResponseEntity<Object>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
+    @Cacheable(value = "customers-today-data", key = "new org.springframework.cache.interceptor.SimpleKey(#search, #size, #page)")
     public ResponseEntity<?> getTodayCustomer(String search, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Customer> customers = CustomerUtil.todayCustomer(pageable);
@@ -134,7 +171,7 @@ public class CustomerServiceImpl implements CustomerService {
             return ApiMessage.errorResponse("User not found");
         }
 
-        topUp(user,assignedUser,amount);
+        topUp(user, assignedUser, amount);
 
         return ApiMessage.successResponse("Top up success");
     }
@@ -142,12 +179,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public ResponseEntity<?> manualTopUpCustomer(String userTokenAssign, String firstName, String lastName, String middleName, double amount) {
 
-        Customer customer =  CustomerUtil.findCustomerByFirstNameLastNameAndMiddleName(firstName,lastName,middleName);
+        Customer customer = CustomerUtil.findCustomerByFirstNameLastNameAndMiddleName(firstName, lastName, middleName);
 
-        if(customer == null || customer.getUser() == null)  return ApiMessage.errorResponse("User not found");
+        if (customer == null || customer.getUser() == null) return ApiMessage.errorResponse("User not found");
 
         User assignedUser = jwt.getUserInToken(userTokenAssign);
-        topUp(customer.getUser(),assignedUser,amount);
+        topUp(customer.getUser(), assignedUser, amount);
 
         return ApiMessage.successResponse("Top up success");
     }
@@ -160,7 +197,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (customerId == null)
             return ApiMessage.errorResponse("Customer not found");
 
-        Customer customer = CustomerUtil.getReferenceById(customerId);
+        Customer customer = referenceById(customerId);
 
         return ApiMessage.successResponse("" + customer.getUser().getId());
     }
@@ -249,27 +286,30 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(cacheNames = {"customers-today-data"}, allEntries = true)
+    })
     public ResponseEntity<?> updateCustomerAttendanceByFirstNameLastNameAndMiddleName(String firstName, String lastName, String middleName) {
-        Customer customer =  CustomerUtil.findCustomerByFirstNameLastNameAndMiddleName(firstName,lastName,middleName);
+        Customer customer = CustomerUtil.findCustomerByFirstNameLastNameAndMiddleName(firstName, lastName, middleName);
         HashMap<String, String> result = new HashMap<>();
 
-        updateCustomerAttendance(customer,customer.getUser(), result);
+        updateCustomerAttendance(customer, customer.getUser(), result);
 
         return new ResponseEntity<Object>(result, HttpStatus.OK);
     }
 
-    private void updateCustomerAttendance(Customer customer, User user, HashMap<String,String> result){
+    private void updateCustomerAttendance(Customer customer, User user, HashMap<String, String> result) {
         Calendar currentDate = Calendar.getInstance();
         currentDate.setTime(new Date());
 
         // if the customer is freeze we can't time in or out
-        if(customer.getStatus() == CustomerStatus.FREEZE){
+        if (customer.getStatus() == CustomerStatus.FREEZE) {
             logger.warn("Customer is on freeze please un-freeze to continue");
             throw new UnsupportedOperationException("Customer is on freeze please un-freeze to continue");
         }
 
         // if the customer has pending balance
-        if(customer.getStatus() == CustomerStatus.IN_ACTIVE){
+        if (customer.getStatus() == CustomerStatus.IN_ACTIVE) {
             logger.warn("Customer is in-active top - up to become active");
             throw new UnsupportedOperationException("Customer is active top - up to become active");
         }
@@ -287,11 +327,11 @@ public class CustomerServiceImpl implements CustomerService {
                     + " and subscribe to new membership");
         }
 
-        if (customer.getMembershipDuration() == null || (customer.getStatus() == CustomerStatus.MEMBER && currentDate.getTime().after(customer.getMembershipDuration()))){
+        if (customer.getMembershipDuration() == null || (customer.getStatus() == CustomerStatus.MEMBER && currentDate.getTime().after(customer.getMembershipDuration()))) {
             customer.setStatus(CustomerStatus.NON_MEMBER);
             CustomerUtil.save(customer);
             membershipService.unEnrollMembershipCustomerByCustomerId(customer.getId());
-            membershipService.enrollCustomerById(customer.getId(),membershipService.getDefaultMembership().getId());
+            membershipService.enrollCustomerById(customer.getId(), membershipService.getDefaultMembership().getId());
         }
 
         boolean isCustomerIsOut = customer.getIsOut();
@@ -334,7 +374,7 @@ public class CustomerServiceImpl implements CustomerService {
         deductCustomerSubscription(user);
     }
 
-    private void topUp(User user, User assignedUser, double amount){
+    private void topUp(User user, User assignedUser, double amount) {
         BigDecimal topUpAMount = BigDecimal.valueOf(amount);
         BigDecimal newCardValue = user.getCardValue().add(topUpAMount);
 
@@ -342,7 +382,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         user.setCardValue(newCardValue);
 
-        BigDecimal pointsEarned = topUpAMount.divide(store.getAmountNeedToEarnOnePoint(),2, RoundingMode.DOWN);
+        BigDecimal pointsEarned = topUpAMount.divide(store.getAmountNeedToEarnOnePoint(), 2, RoundingMode.DOWN);
         BigDecimal totalPoints = pointsEarned.add(user.getPointsAmount());
 
         user.setPointsAmount(totalPoints);

@@ -80,6 +80,11 @@ public class AuditTrailServiceImpl implements AuditTrailService {
         throw new UnsupportedOperationException("Unimplemented method 'findOne'");
     }
 
+    @Override
+    public AuditTrail referenceById(Long id) {
+        return null;
+    }
+
     public AuditTrail referencedById(Long id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'referencedById'");

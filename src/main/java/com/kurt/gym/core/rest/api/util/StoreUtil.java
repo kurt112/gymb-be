@@ -5,13 +5,12 @@ import com.kurt.gym.core.persistence.entity.StoreSale;
 import com.kurt.gym.core.persistence.repository.StoreRepository;
 import com.kurt.gym.core.persistence.repository.StoreSaleRepository;
 import com.kurt.gym.helper.logger.LoggerUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,12 +18,12 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@Service
+@RequiredArgsConstructor
 public class StoreUtil {
     private static StoreRepository storeRepository;
     private static StoreSaleRepository storeSaleRepository;
     private static final Logger logger = LoggerFactory.getLogger(StoreUtil.class);
-    StoreUtil() {
-    }
 
     public static void initRepositories(StoreRepository storeRepository, StoreSaleRepository storeSaleRepository) {
         StoreUtil.storeRepository = storeRepository;
@@ -72,6 +71,9 @@ public class StoreUtil {
         return storeRepository.getReferenceById(1L);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "store-sales", allEntries = true)
+    })
     public static void insertSale(Store store, BigDecimal value, Date date) {
         LoggerUtil.printInfoWithDash(logger, "Inserting Store Sale");
 
@@ -128,6 +130,12 @@ public class StoreUtil {
         LoggerUtil.printInfoWithDash(logger, "Querying Sales");
         logger.info("The Target Date: " + targetDate.toString());
         return storeSaleRepository.findSalesInTargetDate(storeId, targetDate);
+    }
+
+    public static Double findVatInStoreBetweenDate(Long storeId, Date targetDate){
+        LoggerUtil.printInfoWithDash(logger, "Querying Vat");
+        logger.info("The Target Date: " + targetDate.toString());
+        return storeSaleRepository.findVatInTargetDate(storeId, targetDate);
     }
 
 

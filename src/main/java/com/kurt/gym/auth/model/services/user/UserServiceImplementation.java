@@ -2,6 +2,7 @@ package com.kurt.gym.auth.model.services.user;
 
 import java.util.HashMap;
 
+import com.kurt.gym.core.rest.api.util.UserUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,11 @@ public class UserServiceImplementation implements UserService{
     public ResponseEntity<User> findOne(Long id) {
         User userGet = userRepository.getUser(id);
         return new ResponseEntity<>(userGet,HttpStatus.OK);
+    }
+
+    @Override
+    public User referenceById(Long id) {
+        return userRepository.getReferenceById(id);
     }
 
     @Override

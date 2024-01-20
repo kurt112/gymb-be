@@ -77,7 +77,13 @@ public class MembershipServiceImpl implements MembershipService {
         if (membership == null)
             return ApiMessage.errorResponse("No Membership Found");
 
-        return new ResponseEntity<Membership>(membership, HttpStatus.OK);
+        return new ResponseEntity<>(membership, HttpStatus.OK);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "membership-reference-by-id", key="id")
+    public Membership referenceById(Long id) {
+        return MembershipUtil.getReferenceById(id);
     }
 
     @Override
@@ -87,10 +93,6 @@ public class MembershipServiceImpl implements MembershipService {
         Page<Membership> memberships = MembershipUtil.findAllByOrderByCreatedAtDesc(search, pageable);
 
         return new ResponseEntity<>(memberships, HttpStatus.OK);
-    }
-
-    public Membership referencedById(Long id) {
-        return MembershipUtil.getReferenceById(id);
     }
 
     @Override
@@ -124,7 +126,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         Customer customer = CustomerUtil.getReferenceById(customerId);
 
-        Membership membership = MembershipUtil.getReferenceById(membershipId);
+        Membership membership = this.referenceById(membershipId);
 
         if (membership == null) {
             return ApiMessage.errorResponse("Membership not found");
@@ -210,7 +212,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public Membership getDefaultMembership() {
-        return MembershipUtil.getReferenceById(1L);
+        return this.referenceById(1L);
     }
 
     @Override
